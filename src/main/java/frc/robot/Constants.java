@@ -2,10 +2,13 @@ package frc.robot;
 import java.util.Map;
 import edu.wpi.first.math.util.Units;
 
+import frc.robot.commands.ScoreCommand.ShooterPoint;
+
 public final class Constants {
   public static class OperatorConstants {
     public static final int kDriverControllerPort = 0;
     public static final int kOperatorControllerPort = 1;
+    public static final double kDeadband = 0.3;
   }
 
   public static class VisionConstants {
@@ -42,6 +45,15 @@ public final class Constants {
     public static final double kS = 0.1;
     public static final double kV = 0.12;
     public static final double kA = 0.01;
+
+    // fake data for now
+    public static final ShooterPoint[] kShooterLUT = {
+      new ShooterPoint(2.0, 38, 3100),
+      new ShooterPoint(2.5, 40, 3350),
+      new ShooterPoint(3.0, 42, 3600),
+      new ShooterPoint(3.5, 44, 3900),
+      new ShooterPoint(4.0, 46, 4250),
+  };
 }
 
   public static class ArmConstants {

@@ -446,7 +446,7 @@ public enum SwerveState {
      * @param velocity Velocity according to the field.
      */
     public Command driveFieldOriented(Supplier<ChassisSpeeds> velocity) {
-        state = SwerveState.TELEOP
+        state = SwerveState.TELEOP;
         return run(() -> {
             swerveDrive.driveFieldOriented(velocity.get());
         });
@@ -752,6 +752,10 @@ public Command AimAtScoringAprilla() {
 
     public SwerveState getState() {
         return this.state;
+    }
+
+    public Vision getVision() {
+        return this.vision;
     }
 //#endregion
 }
