@@ -2,7 +2,6 @@ package frc.robot.subsystems;
 
 import frc.robot.Constants;
 
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -14,10 +13,9 @@ import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.*;
-import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
-import com.revrobotics.spark.config.MAXMotionConfig.MAXMotionPositionMode;
+
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-import com.revrobotics.spark.ClosedLoopSlot;
+import com.revrobotics.spark.FeedbackSensor;
 import com.revrobotics.spark.SparkClosedLoopController;
 
 public class ShooterSubsystem extends SubsystemBase {
@@ -31,7 +29,6 @@ public class ShooterSubsystem extends SubsystemBase {
   private final SparkMax s_motor;
   private final SparkClosedLoopController closedLoop;
   private final RelativeEncoder encoder;
-  private final SimpleMotorFeedforward feedforward;
 
   private ShooterState state = ShooterState.IDLE;
   private double targetRPM = Double.NaN;
@@ -40,12 +37,7 @@ public class ShooterSubsystem extends SubsystemBase {
     m_motor = new SparkMax(Constants.ShooterConstants.kMainMotorID, MotorType.kBrushless);
     s_motor = new SparkMax(Constants.ShooterConstants.kSecondaryMotorID, MotorType.kBrushless);
     encoder = m_motor.getEncoder();
-    
-    feedforward = new SimpleMotorFeedforward(
-      Constants.ShooterConstants.kS,
-      Constants.ShooterConstants.kV,
-      Constants.ShooterConstants.kA
-    );
+
 
     SparkMaxConfig m_config = new SparkMaxConfig();
     SparkMaxConfig s_config = new SparkMaxConfig();
@@ -66,9 +58,13 @@ public class ShooterSubsystem extends SubsystemBase {
         Constants.ShooterConstants.kP, 
         Constants.ShooterConstants.kI, 
         Constants.ShooterConstants.kD 
-      );
+      )
+    .feedForward
+        .kS(Constants.ShooterConstants.kS)
+        .kV(Constants.ShooterConstants.kV)
+        .kA(Constants.ShooterConstants.kA);
 
-    m_motor.configure(m_config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    m_motor.configure(m_config, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
     closedLoop = m_motor.getClosedLoopController();
 
     s_config
@@ -116,23 +112,11 @@ public class ShooterSubsystem extends SubsystemBase {
     this.targetRPM = Double.NaN;
   }
 
-  private double calcFF() {
-    if (Double.isNaN(targetRPM)) {
-      return 0.0;
-    }
-    return feedforward.calculate(targetRPM);
-  }
-
   @Override
   public void periodic() {
     
      if (!Double.isNaN(targetRPM)) { 
-      closedLoop.setReference(
-        targetRPM, 
-        ControlType.kVelocity,
-        ClosedLoopSlot.kSlot0,
-        calcFF()
-      );
+      closedLoop.setSetpoint(targetRPM, ControlType.kVelocity);
       
       if (isAtTargetVelocity()) {
         state = ShooterState.AT_TARGET;
