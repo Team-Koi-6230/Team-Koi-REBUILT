@@ -31,8 +31,6 @@ public final class Constants {
 
   public static class ShooterConstants {
     public static final int kMainMotorID = 0;
-    public static final int kSecondaryMotorID = 0;
-    public static final boolean kSecondaryInverted = true;
     
     public static final double kGearRatio = 1.0;
     public static final double kTolerance = 50.0;

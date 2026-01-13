@@ -24,7 +24,6 @@ public class ShooterSubsystem extends SubsystemBase {
   }
 
   private final SparkMax m_motor;
-  private final SparkMax s_motor;
   private final SparkClosedLoopController closedLoop;
   private final RelativeEncoder encoder;
 
@@ -33,7 +32,6 @@ public class ShooterSubsystem extends SubsystemBase {
 
   public ShooterSubsystem() {
     m_motor = new SparkMax(Constants.ShooterConstants.kMainMotorID, MotorType.kBrushless);
-    s_motor = new SparkMax(Constants.ShooterConstants.kSecondaryMotorID, MotorType.kBrushless);
     encoder = m_motor.getEncoder();
 
 
@@ -64,16 +62,6 @@ public class ShooterSubsystem extends SubsystemBase {
 
     m_motor.configure(m_config, com.revrobotics.ResetMode.kNoResetSafeParameters, com.revrobotics.PersistMode.kPersistParameters);
     closedLoop = m_motor.getClosedLoopController();
-
-    s_config
-      .idleMode(IdleMode.kCoast)
-      .voltageCompensation(12.0);
-    
-    s_config.smartCurrentLimit(40, 60);
-    
-    s_config.follow(m_motor, Constants.ShooterConstants.kSecondaryInverted);
-    
-    s_motor.configure(s_config, com.revrobotics.ResetMode.kResetSafeParameters, com.revrobotics.PersistMode.kPersistParameters);
   }
 
   // boilerplate command to use the subsystem
