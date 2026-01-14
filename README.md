@@ -40,3 +40,29 @@ if(gameData.length() > 0)
 ```
 honestly no Idea what to do with this, but it's new for this season.
 
+- Not new but Shmickler wants to use [Servos](https://en.wikipedia.org/wiki/Servomotor) on the robot so here's how to use them:
+```java
+Servo exampleServo = new Servo(/*PWM port*/);
+exampleServo.set(0.5); // voltage from 0-1 (0 starting angle, 1 final possible angle)
+exampleServo.setAngle(75); // im not explaining it you should get it by the name
+```
+
+### REVLib
+lots of changes here, I hate it and love it at the same time
+
+- `closedLoopController.setRefrence(params)` was deprecated, we will now use the following:
+```java
+m_controller.setSetpoint(/*params are the same I have no idea why they changed it*/);
+```
+
+- This one is actually a banger, they added FeedForward into closedLoop controller:
+```java
+config.closedLoop.feedForward
+    .kS(s)
+    .kV(v)
+    .kA(a)
+    .kG(g) // normal gravity, for elevators
+    .kCos(g) // gravity related to angle, for arms
+    .kCosRatio(cosRatio); // kCosRatio relates the encoder position to absolute position
+```
+
