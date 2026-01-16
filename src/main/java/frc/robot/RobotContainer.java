@@ -20,6 +20,7 @@ public class RobotContainer {
   private final CommandXboxController m_operatorController =
       new CommandXboxController(OperatorConstants.kOperatorControllerPort);
   private final RumbleSubsystem rumbleSubsystem = new RumbleSubsystem(m_driverController, m_operatorController);
+  @SuppressWarnings("unused") // it's a periodic only subsystem
   private final GameDataSubsystem gameDataSubsystem = new GameDataSubsystem(rumbleSubsystem);
 
   private final ShooterSubsystem shooterSubsystem = new ShooterSubsystem();
