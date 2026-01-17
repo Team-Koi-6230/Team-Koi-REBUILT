@@ -7,7 +7,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.Command;
 
 import com.revrobotics.RelativeEncoder;
-import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.*;
@@ -15,6 +14,7 @@ import com.revrobotics.spark.config.*;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.FeedbackSensor;
 import com.revrobotics.spark.SparkClosedLoopController;
+import com.revrobotics.spark.SparkFlex;
 
 public class ShooterSubsystem extends SubsystemBase {
   public enum ShooterState {
@@ -23,7 +23,8 @@ public class ShooterSubsystem extends SubsystemBase {
     IDLE
   }
 
-  private final SparkMax m_motor;
+  private final SparkFlex m_motor;
+  private final SparkFlex s_motor;
   private final SparkClosedLoopController closedLoop;
   private final RelativeEncoder encoder;
 
@@ -31,18 +32,20 @@ public class ShooterSubsystem extends SubsystemBase {
   private double targetRPM = Double.NaN;
 
   public ShooterSubsystem() {
-    m_motor = new SparkMax(Constants.ShooterConstants.kMainMotorID, MotorType.kBrushless);
+    m_motor = new SparkFlex(Constants.ShooterConstants.kMainMotorID, MotorType.kBrushless);
     encoder = m_motor.getEncoder();
 
+    s_motor = new SparkFlex(Constants.ShooterConstants.kSecondaryMotorID, MotorType.kBrushless);
 
-    SparkMaxConfig m_config = new SparkMaxConfig();
+
+    SparkFlexConfig m_config = new SparkFlexConfig();
 
     m_config
       .idleMode(IdleMode.kCoast)
-      .inverted(false)
+      .inverted(Constants.ShooterConstants.kInverted)
       .voltageCompensation(12.0);
 
-    m_config.smartCurrentLimit(40, 60);
+    m_config.smartCurrentLimit(60, 80);
 
     m_config.encoder
       .velocityConversionFactor(1.0 / Constants.ShooterConstants.kGearRatio);
@@ -59,7 +62,14 @@ public class ShooterSubsystem extends SubsystemBase {
         .kV(Constants.ShooterConstants.kV)
         .kA(Constants.ShooterConstants.kA);
 
-    m_motor.configure(m_config, com.revrobotics.ResetMode.kNoResetSafeParameters, com.revrobotics.PersistMode.kPersistParameters);
+    m_motor.configure(m_config, com.revrobotics.ResetMode.kResetSafeParameters, com.revrobotics.PersistMode.kPersistParameters);
+
+    SparkFlexConfig s_config = new SparkFlexConfig();
+
+    s_config.follow(m_motor, !Constants.ShooterConstants.kInverted);
+
+    s_motor.configure(s_config, com.revrobotics.ResetMode.kResetSafeParameters, com.revrobotics.PersistMode.kPersistParameters);
+
     closedLoop = m_motor.getClosedLoopController();
   }
 
