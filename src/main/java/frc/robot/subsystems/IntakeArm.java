@@ -24,8 +24,17 @@ public class IntakeArm extends SubsystemBase {
     private final SparkMax m_motor;
     private SparkClosedLoopController m_controller;
     private final RelativeEncoder m_relativeEncoder;
-    private final ArmFeedforward aff;
-    
+
+    private double targetAngle;
+     
+     public enum IntakeArmState{
+        IDLE,
+        OPEN,
+        CLOSED,
+        MOVING
+     }
+     public IntakeArmState state = IntakeArmState.IDLE;
+
     public IntakeArm() 
     {
         // set absolute encoder
@@ -37,26 +46,25 @@ public class IntakeArm extends SubsystemBase {
          
         // set motor
         m_motor = new SparkMax(IntakeArmConstants.kMotorID, MotorType.kBrushless);
+        targetAngle = 0;
 
         // set config pid & ff
         SparkMaxConfig config = new SparkMaxConfig();
         
         config.closedLoop
-        .outputRange(-1, 1)
-        .feedbackSensor(FeedbackSensor.kPrimaryEncoder);
-        
-        config.closedLoop
-        .pidf(
+        .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+        .pid(
             IntakeArmConstants.kP,
             IntakeArmConstants.kI,
-            IntakeArmConstants.kD,
-            IntakeArmConstants.kFF
+            IntakeArmConstants.kD
         )
-        .maxMotion
-            .positionMode(MAXMotionPositionMode.kMAXMotionTrapezoidal)
-            .maxAcceleration(IntakeArmConstants.kMAXMotionAcceleration)
-            .cruiseVelocity(IntakeArmConstants.kMAXVelocity)
-            .allowedProfileError(IntakeArmConstants.kTolerance);
+        .feedForward
+        .kS(IntakeArmConstants.kS)
+        .kV(IntakeArmConstants.kV)
+        .kA(IntakeArmConstants.kA)
+        .kCos(IntakeArmConstants.kG)
+        .kCosRatio(IntakeArmConstants.kCosRatio);
+        
 
 
         // set motor config
@@ -70,15 +78,6 @@ public class IntakeArm extends SubsystemBase {
         // set motor contoller
         m_controller = m_motor.getClosedLoopController();
 
-        // set arm feedforward
-        aff = new ArmFeedforward(
-        IntakeArmConstants.kS,
-        IntakeArmConstants.kG,
-        IntakeArmConstants.kV,
-        IntakeArmConstants.kA
-        );
-
-
        // set the relative position to the duty position
         m_relativeEncoder.setPosition(m_absoluteEncoder.get());
     }
@@ -91,22 +90,42 @@ public class IntakeArm extends SubsystemBase {
     }
 
     public void setAngle(double angle){
-    
-        double arbffvolts = aff.calculate(Math.toRadians(angle),
-        Math.toRadians(m_relativeEncoder.getPosition()),
-        Math.toRadians(m_relativeEncoder.getVelocity())
-        );
-        
-        m_controller.setReference(angle, ControlType.kMAXMotionPositionControl, ClosedLoopSlot.kSlot0, arbffvolts);
+        this.targetAngle = angle;
+        state = IntakeArmState.MOVING;
     }
 
     public double getAngle() 
     {
         return m_relativeEncoder.getPosition();
     }
+     
+    private boolean isOpen() 
+    {
+        return Math.abs(IntakeArmConstants.OPEN_ANGLE - getAngle()) < IntakeArmConstants.kTolerance;
+    }
+
+    private boolean isClosed() 
+    {
+        return Math.abs(IntakeArmConstants.CLOSED_ANGLE - getAngle()) < IntakeArmConstants.kTolerance;
+    }
+        
 
      @Override
     public void periodic() {
+        m_controller.setSetpoint(this.targetAngle, ControlType.kPosition);
+        
+        if (Double.isNaN(this.targetAngle)) 
+        {
+            state = IntakeArmState.IDLE;
+        }
+        else if (isOpen()) 
+        {
+            state = IntakeArmState.OPEN;            
+        }
+        else if (isClosed())
+        {
+            state = IntakeArmState.CLOSED;
+        }
     }
 
     @Override
