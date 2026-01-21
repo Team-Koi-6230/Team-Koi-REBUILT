@@ -462,7 +462,7 @@ public class SwerveSubsystem extends SubsystemBase {
     public Command driveRelativeToHub(Supplier<ChassisSpeeds> velocity) {
         state = SwerveState.VISION_AIMING;
         return run(() -> {
-            driveWhileAiming(velocity.get());
+            driveWhileAiming(velocity.get(), Constants.FieldConstants.getHubPose(), Constants.ShooterConstants.kMaxShootingDist);
         }).finallyDo(() -> state = SwerveState.IDLE);
     }
 
@@ -524,21 +524,21 @@ public class SwerveSubsystem extends SubsystemBase {
     /**
      * Drives the robot using field-relative translation while automatically
      * rotating
-     * to aim at the hub using a PID controller.
+     * to aim at a target using a PID controller.
      *
      * - `velocity` - controller input
+     * - `target` - where the robot is looking to aim at
     */
-    public void driveWhileAiming(ChassisSpeeds velocity) {
+    public void driveWhileAiming(ChassisSpeeds velocity, Pose2d target, double maxDist) {
         Translation2d vHubDist = vision.getPosition().getTranslation().minus(Constants.FieldConstants.getHubPose().getTranslation());
-        if (vHubDist.getNorm() > Constants.ShooterConstants.kMaxShootingDist) {
-            System.out.println("Robot is too far from the hub");
+        if (vHubDist.getNorm() > maxDist) {
+            System.out.println("Robot is too far from the target");
             return;
         }
         state = SwerveState.VISION_AIMING;
-        Pose2d hub = Constants.FieldConstants.getHubPose();
         Pose2d robotPose = getPose();
 
-        Rotation2d angleToHub = hub.getTranslation()
+        Rotation2d angleToTarget = target.getTranslation()
                 .minus(robotPose.getTranslation())
                 .getAngle();
 
