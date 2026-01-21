@@ -98,13 +98,12 @@ public static class IntakeArmConstants{
   public static final double kG = 0;
   public static final double kCosRatio = 1;
 
-  public static final int ABS_ENCODER_CHANNEL = 0;
-  public static final int ABS_ENCODER_RANGE = 360;
-  public static final int ABS_ENCODER_OFFSET = 0;
+  public static final int kAbsoluteEncoderRange = 360;
+  public static final int kAbsoluteEncoderOffset = 0;
 
   public static final double kTolerance = 0.5;
 
-  public static final int OPEN_ANGLE = 67;
-  public static final int CLOSED_ANGLE = 0;
+  public static final int kOpenAngle = 67;
+  public static final int kClosedAngle = 0;
 }
 }
