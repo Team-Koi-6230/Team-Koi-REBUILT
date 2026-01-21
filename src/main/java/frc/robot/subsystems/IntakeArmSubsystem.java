@@ -16,7 +16,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import frc.robot.Constants.IntakeArmConstants;
 
-public class IntakeArm extends SubsystemBase {
+public class IntakeArmSubsystem extends SubsystemBase {
     private final DutyCycleEncoder m_absoluteEncoder;
     private final SparkMax m_motor;
     private SparkClosedLoopController m_controller;
@@ -32,13 +32,13 @@ public class IntakeArm extends SubsystemBase {
      }
      public IntakeArmState state = IntakeArmState.IDLE;
 
-    public IntakeArm() 
+    public IntakeArmSubsystem() 
     {
         // set absolute encoder
         m_absoluteEncoder = new DutyCycleEncoder(
         IntakeArmConstants.kAbsoluteEncoderID, 
-        IntakeArmConstants.ABS_ENCODER_RANGE, 
-        IntakeArmConstants.ABS_ENCODER_OFFSET
+        IntakeArmConstants.kAbsoluteEncoderRange, 
+        IntakeArmConstants.kAbsoluteEncoderOffset
         );
          
         // set motor
@@ -85,7 +85,8 @@ public class IntakeArm extends SubsystemBase {
             setAngle(angle);
         });
     }
-
+    
+    //set target angle 
     public void setAngle(double angle){
         this.targetAngle = angle;
         state = IntakeArmState.MOVING;
@@ -98,12 +99,12 @@ public class IntakeArm extends SubsystemBase {
      
     private boolean isOpen() 
     {
-        return Math.abs(IntakeArmConstants.OPEN_ANGLE - getAngle()) < IntakeArmConstants.kTolerance;
+        return Math.abs(IntakeArmConstants.kOpenAngle - getAngle()) < IntakeArmConstants.kTolerance;
     }
 
     private boolean isClosed() 
     {
-        return Math.abs(IntakeArmConstants.CLOSED_ANGLE - getAngle()) < IntakeArmConstants.kTolerance;
+        return Math.abs(IntakeArmConstants.kClosedAngle - getAngle()) < IntakeArmConstants.kTolerance;
     }
         
 
