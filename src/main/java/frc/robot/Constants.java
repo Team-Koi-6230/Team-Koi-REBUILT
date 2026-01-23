@@ -1,12 +1,6 @@
 package frc.robot;
 
-import java.util.ArrayList;
-
-import edu.wpi.first.apriltag.AprilTagFieldLayout;
-import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -80,34 +74,38 @@ public final class Constants {
         new ShooterPoint(4.0, 4250)
     };
 
-  public static final double kMaxShootingDist = 4.0;
-}
+    public static final double kMaxShootingDist = 4.0;
+  }
 
-public static class IntakeArmConstants{
-  public static final int kAbsoluteEncoderID = 0;
-  public static final int kMotorID = 0;
+  public static class IntakeArmConstants {
+    public static final int kAbsoluteEncoderID = 0;
+    public static final int kMotorID = 0;
 
-  public static final double kP = 0;
-  public static final double kI = 0;
-  public static final double kD = 0;
-  public static final double kFF = 0;
-    
-  public static final double kS = 0;
-  public static final double kV = 0;
-  public static final double kA = 0;
-  public static final double kG = 0;
-  public static final double kCosRatio = 1;
+    public static final double kP = 0;
+    public static final double kI = 0;
+    public static final double kD = 0;
+    public static final double kFF = 0;
 
-  public static final int kAbsoluteEncoderRange = 360;
-  public static final int kAbsoluteEncoderOffset = 0;
+    public static final double kS = 0;
+    public static final double kV = 0;
+    public static final double kA = 0;
+    public static final double kG = 0;
+    public static final double kCosRatio = 1;
 
-  public static final double kTolerance = 0.5;
+    public static final int kAbsoluteEncoderRange = 360;
+    public static final int kAbsoluteEncoderOffset = 0;
 
-  public static final int kOpenAngle = 67;
-  public static final int kClosedAngle = 0;
-}
+    public static final double kTolerance = 0.5;
 
-public static class feederConstants {
-  public static final int kMotorID = 0;
-}
+    public static final int kOpenAngle = 67;
+    public static final int kClosedAngle = 0;
+  }
+
+  public static class IntakeRollerConstants {
+    public static final int kMotorID = 0;
+  }
+
+  public static class FeederConstants {
+    public static final int kMotorID = 0;
+  }
 }

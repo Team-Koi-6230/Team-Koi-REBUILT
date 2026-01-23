@@ -7,22 +7,33 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
-public class feederSubsystem extends SubsystemBase {
-    private final SparkMax m_SparkMax;
+public class FeederSubsystem extends SubsystemBase {
+    public enum FeederState {
+        SPINNING,
+        IDLE
+    }
 
-    /** Creates a new ExampleSubsystem. */
-    public feederSubsystem() {
-        m_SparkMax = new SparkMax(Constants.feederConstants.kMotorID, MotorType.kBrushless);
+    private final SparkMax m_SparkMax;
+    private FeederState state;
+
+    public FeederSubsystem() {
+        m_SparkMax = new SparkMax(Constants.FeederConstants.kMotorID, MotorType.kBrushless);
+        state = FeederState.IDLE;
     }
 
     public void setVoltage(double power) {
+        state = power != 0 ? FeederState.SPINNING : FeederState.IDLE;
         m_SparkMax.setVoltage(power);
     }
 
-    public Command feederMethodCommand(double power) {
+    public Command feederSpinCommand(double power) {
         return runOnce(() -> {
             setVoltage(power);
         });
+    }
+
+    public FeederState getState() {
+        return state;
     }
     
     @Override
