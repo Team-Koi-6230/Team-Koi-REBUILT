@@ -44,6 +44,7 @@ public class Vision {
 
         swerveDrive.addVisionMeasurement(est.pose,est.timestampSeconds);
         currentPosition = swerveDrive.getPose();
+        
         return true;
     }
 
