@@ -16,16 +16,19 @@ import frc.robot.Constants;
 
 public class ClimberSubsystem extends SubsystemBase {
   public enum ClimberState {
-    MOVING,
-    AT_TARGET
+    MOVING_GROUND,
+    AT_TARGET_GROUND,
+    MOVING_HANG,
+    AT_TARGET_HANG
   }
 
   private double targetHeight = 0.0;
-  private ClimberState state = ClimberState.MOVING;
+  private ClimberState state = ClimberState.MOVING_GROUND;
   private final SparkMax m_motor;
   private final SparkMax s_motor;
   private final RelativeEncoder encoder;
   private final SparkClosedLoopController closedLoop;
+  private boolean isGrounded = true;
 
   public ClimberSubsystem() {
     m_motor = new SparkMax(Constants.ClimberConstants.kMainMotorID, MotorType.kBrushless);
@@ -35,17 +38,30 @@ public class ClimberSubsystem extends SubsystemBase {
     SparkMaxConfig config = new SparkMaxConfig();
     SparkMaxConfig followerConfig = new SparkMaxConfig();
 
-    config.closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+    // slot 0 is for ground and clawed, slot 1 is for when the entire robot's mass
+    // is on the climber elevator.
+    config.closedLoop
+        .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
         .pid(
-            Constants.ClimberConstants.kP,
-            Constants.ClimberConstants.kI,
-            Constants.ClimberConstants.kD)
+            Constants.ClimberConstants.kP_ground,
+            Constants.ClimberConstants.kI_ground,
+            Constants.ClimberConstants.kD_ground,
+            ClosedLoopSlot.kSlot0).feedForward
+        .kS(Constants.ClimberConstants.kS_ground, ClosedLoopSlot.kSlot0)
+        .kG(Constants.ClimberConstants.kG_ground, ClosedLoopSlot.kSlot0)
+        .kV(Constants.ClimberConstants.kV_ground, ClosedLoopSlot.kSlot0)
+        .kA(Constants.ClimberConstants.kA_ground, ClosedLoopSlot.kSlot0);
 
-                .feedForward
-        .kS(Constants.ClimberConstants.kS)
-        .kG(Constants.ClimberConstants.kG)
-        .kV(Constants.ClimberConstants.kV)
-        .kA(Constants.ClimberConstants.kA);
+    config.closedLoop
+        .pid(
+            Constants.ClimberConstants.kP_hang,
+            Constants.ClimberConstants.kI_hang,
+            Constants.ClimberConstants.kD_hang,
+            ClosedLoopSlot.kSlot1).feedForward
+        .kS(Constants.ClimberConstants.kS_hang, ClosedLoopSlot.kSlot1)
+        .kG(Constants.ClimberConstants.kG_hang, ClosedLoopSlot.kSlot1)
+        .kV(Constants.ClimberConstants.kV_hang, ClosedLoopSlot.kSlot1)
+        .kA(Constants.ClimberConstants.kA_hang, ClosedLoopSlot.kSlot1);
 
     config.idleMode(IdleMode.kBrake);
     config.encoder
@@ -60,9 +76,15 @@ public class ClimberSubsystem extends SubsystemBase {
 
   }
 
-  public Command setHeightCommand(double height) {
+  public Command setHeightCommandGround(double height) {
     return runOnce(() -> {
-      setPosition(height);
+      setPositionGround(height);
+    });
+  }
+
+  public Command setHeightCommandHang(double height) {
+    return runOnce(() -> {
+      setPositionHang(height);
     });
   }
 
@@ -82,17 +104,34 @@ public class ClimberSubsystem extends SubsystemBase {
     return encoder.getVelocity();
   }
 
-  public void setPosition(double targetHeight) {
+  public void setPositionGround(double targetHeight) {
     this.targetHeight = targetHeight;
+    isGrounded = true;
+  }
+
+  public void setPositionHang(double targetHeight) {
+    this.targetHeight = targetHeight;
+    isGrounded = false;
   }
 
   @Override
   public void periodic() {
-    closedLoop.setSetpoint(targetHeight, ControlType.kPosition);
-    if (Math.abs(targetHeight - getHeight()) < Constants.ClimberConstants.kTolerance) {
-      state = ClimberState.AT_TARGET;
+    if (isGrounded) {
+      closedLoop.setSetpoint(targetHeight, ControlType.kPosition, ClosedLoopSlot.kSlot0);
+      if (Math.abs(targetHeight - getHeight()) < Constants.ClimberConstants.kTolerance) {
+      state = ClimberState.AT_TARGET_GROUND;
     } else {
-      state = ClimberState.MOVING;
+      state = ClimberState.MOVING_GROUND;
     }
+    }
+    else {
+      closedLoop.setSetpoint(targetHeight, ControlType.kPosition, ClosedLoopSlot.kSlot1);
+      if (Math.abs(targetHeight - getHeight()) < Constants.ClimberConstants.kTolerance) {
+      state = ClimberState.AT_TARGET_HANG;
+    } else {
+      state = ClimberState.MOVING_GROUND;
+    }
+    }
+    
   }
 }

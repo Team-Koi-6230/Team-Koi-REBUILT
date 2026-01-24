@@ -97,7 +97,7 @@ public final class Constants {
 
     public static final RumblePack kRumbleScoreReady = new RumblePack(0.3, 0.2, Priority.MEDIUM);
   }
-  
+
   public static class HoodConstants {
     public static final int kServoIdYehodi = 0;
     public static final int kServoIdGoy = 0;
@@ -148,14 +148,24 @@ public final class Constants {
   }
 
   public final class ClimberConstants {
-    public static double kS = 0.0;
-    public static double kF = 0.0;
-    public static double kG = 0.0;
-    public static double kV = 0.0;
-    public static double kA = 0.0;
-    public static double kP = 0.0;
-    public static double kI = 0.0;
-    public static double kD = 0.0;
+    public static double kS_ground = 0.0;
+    public static double kG_ground = 0.0;
+    public static double kV_ground = 0.0;
+    public static double kA_ground = 0.0;
+
+    public static double kP_ground = 0.0;
+    public static double kI_ground = 0.0;
+    public static double kD_ground = 0.0;
+
+    public static double kS_hang = 0.0;
+    public static double kG_hang = 0.0;
+    public static double kV_hang = 0.0;
+    public static double kA_hang = 0.0;
+
+    public static double kP_hang = 0.0;
+    public static double kI_hang = 0.0;
+    public static double kD_hang = 0.0;
+
     public static double kTolerance = 0.5;
 
     public static int kMainMotorID = 20;
