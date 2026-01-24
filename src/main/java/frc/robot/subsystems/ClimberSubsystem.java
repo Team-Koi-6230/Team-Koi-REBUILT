@@ -11,6 +11,7 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.*;
 import com.revrobotics.RelativeEncoder;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
 
 public class ClimberSubsystem extends SubsystemBase {
@@ -57,6 +58,12 @@ public class ClimberSubsystem extends SubsystemBase {
     s_motor.configure(followerConfig, com.revrobotics.ResetMode.kResetSafeParameters,
         com.revrobotics.PersistMode.kPersistParameters);
 
+  }
+
+  public Command setHeightCommand(double height) {
+    return runOnce(() -> {
+      setPosition(height);
+    });
   }
 
   public void stop() {
