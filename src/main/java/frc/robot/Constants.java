@@ -137,12 +137,12 @@ public final class Constants {
       public static double kP = 0.0;
       public static double kI = 0.0;
       public static double kD = 0.0;
-      public static double tolerance=0.0;
+      public static double kTolerance=0.5;
 
-      public static int MOTOR1_CAN_ID = 0;
-      public static int MOTOR2_CAN_ID = 0;
+      public static int kMainMotorID = 20;
+      public static int kSecondaryMotorID = 21;
 
-      public static double METERS_PER_ROTATION = 0.0;
+      public static double kMetersPerRotation = 0.0;
 
       }
 
