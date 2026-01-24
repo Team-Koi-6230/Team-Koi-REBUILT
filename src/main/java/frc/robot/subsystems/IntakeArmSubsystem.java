@@ -23,51 +23,46 @@ public class IntakeArmSubsystem extends SubsystemBase {
     private final RelativeEncoder m_relativeEncoder;
 
     private double targetAngle;
-     
-     public enum IntakeArmState{
+
+    public enum IntakeArmState {
         IDLE,
         OPEN,
         CLOSED,
         MOVING
-     }
-     public IntakeArmState state = IntakeArmState.IDLE;
+    }
 
-    public IntakeArmSubsystem() 
-    {
+    public IntakeArmState state = IntakeArmState.IDLE;
+
+    public IntakeArmSubsystem() {
         // set absolute encoder
         m_absoluteEncoder = new DutyCycleEncoder(
-        IntakeArmConstants.kAbsoluteEncoderID, 
-        IntakeArmConstants.kAbsoluteEncoderRange, 
-        IntakeArmConstants.kAbsoluteEncoderOffset
-        );
-         
+                IntakeArmConstants.kAbsoluteEncoderID,
+                IntakeArmConstants.kAbsoluteEncoderRange,
+                IntakeArmConstants.kAbsoluteEncoderOffset);
+
         // set motor
         m_motor = new SparkMax(IntakeArmConstants.kMotorID, MotorType.kBrushless);
         targetAngle = 0;
 
         // set config pid & ff
         SparkMaxConfig config = new SparkMaxConfig();
-        
-        config.closedLoop
-        .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-        .pid(
-            IntakeArmConstants.kP,
-            IntakeArmConstants.kI,
-            IntakeArmConstants.kD
-        )
-        .feedForward
-        .kS(IntakeArmConstants.kS)
-        .kV(IntakeArmConstants.kV)
-        .kA(IntakeArmConstants.kA)
-        .kCos(IntakeArmConstants.kG)
-        .kCosRatio(IntakeArmConstants.kCosRatio);
-        
 
+        config.closedLoop
+                .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+                .pid(
+                        IntakeArmConstants.kP,
+                        IntakeArmConstants.kI,
+                        IntakeArmConstants.kD).feedForward
+                .kS(IntakeArmConstants.kS)
+                .kV(IntakeArmConstants.kV)
+                .kA(IntakeArmConstants.kA)
+                .kCos(IntakeArmConstants.kG)
+                .kCosRatio(IntakeArmConstants.kCosRatio);
 
         // set motor config
         m_motor.configure(config,
-        ResetMode.kNoResetSafeParameters,
-        PersistMode.kNoPersistParameters);
+                ResetMode.kNoResetSafeParameters,
+                PersistMode.kNoPersistParameters);
 
         // set relative encoder
         m_relativeEncoder = m_motor.getEncoder();
@@ -75,53 +70,55 @@ public class IntakeArmSubsystem extends SubsystemBase {
         // set motor contoller
         m_controller = m_motor.getClosedLoopController();
 
-       // set the relative position to the duty position
+        // set the relative position to the duty position
         m_relativeEncoder.setPosition(m_absoluteEncoder.get());
     }
-      
-    public Command IntakeArmCommand(double angle) {
 
+    public Command IntakeArmCommand(double angle) {
         return runOnce(() -> {
             setAngle(angle);
         });
     }
-    
-    //set target angle 
-    public void setAngle(double angle){
+
+    // set target angle
+    public void setAngle(double angle) {
         this.targetAngle = angle;
         state = IntakeArmState.MOVING;
     }
 
-    public double getAngle() 
-    {
+    public IntakeArmState getState() {
+        return state;
+    }
+
+    public double getAngle() {
         return m_relativeEncoder.getPosition();
     }
-     
-    private boolean isOpen() 
-    {
+
+    private boolean isOpen() {
         return Math.abs(IntakeArmConstants.kOpenAngle - getAngle()) < IntakeArmConstants.kTolerance;
     }
 
-    private boolean isClosed() 
-    {
+    public void OpenArm() {
+        setAngle(IntakeArmConstants.kOpenAngle);
+    }
+
+    private boolean isClosed() {
         return Math.abs(IntakeArmConstants.kClosedAngle - getAngle()) < IntakeArmConstants.kTolerance;
     }
-        
 
-     @Override
+    public void CloseArm() {
+        setAngle(IntakeArmConstants.kClosedAngle);
+    }
+
+    @Override
     public void periodic() {
         m_controller.setSetpoint(this.targetAngle, ControlType.kPosition);
-        
-        if (Double.isNaN(this.targetAngle)) 
-        {
+
+        if (Double.isNaN(this.targetAngle)) {
             state = IntakeArmState.IDLE;
-        }
-        else if (isOpen()) 
-        {
-            state = IntakeArmState.OPEN;            
-        }
-        else if (isClosed())
-        {
+        } else if (isOpen()) {
+            state = IntakeArmState.OPEN;
+        } else if (isClosed()) {
             state = IntakeArmState.CLOSED;
         }
     }

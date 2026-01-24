@@ -1,13 +1,6 @@
 package frc.robot;
 
-import java.util.ArrayList;
-
-import edu.wpi.first.apriltag.AprilTagFieldLayout;
-import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import frc.robot.commands.ScoreCommand.ShooterPoint;
@@ -16,6 +9,25 @@ import frc.robot.utils.RumblePack;
 
 public final class Constants {
   public static class OperatorConstants {
+
+    public final class ClimberConstants {
+      public static double kS = 0.0;
+      public static double kF = 0.0;
+      public static double kG = 0.0;
+      public static double kV = 0.0;
+      public static double kA = 0.0;
+      public static double kP = 0.0;
+      public static double kI = 0.0;
+      public static double kD = 0.0;
+      public static double tolerance = 0.0;
+
+      public static int MOTOR1_CAN_ID = 0;
+      public static int MOTOR2_CAN_ID = 0;
+
+      public static double METERS_PER_ROTATION = 0.0;
+
+    }
+
     public static final int kDriverControllerPort = 0;
     public static final int kOperatorControllerPort = 1;
     public static final double kDeadband = 0.3;
@@ -47,7 +59,8 @@ public final class Constants {
   }
 
   public static class SwerveDriveConstants {
-    public static final double kMaxSpeed = Units.feetToMeters(20);
+    public static final double kMaxSpeed = 5.36448;
+    public static final double kMaxAngularVelocity = Math.PI;
     public static final double kAimingSpeedModifier = 0.5;
     public static final double kVisionPeriod = 0.1; // 10Hz
     public static final double kTargetErrorTolerance = Math.toRadians(3);
@@ -55,8 +68,8 @@ public final class Constants {
   }
 
   public static class ShooterConstants {
-    public static final int kMainMotorID = 0;
-    public static final int kSecondaryMotorID = 0;
+    public static final int kMainMotorID = 15;
+    public static final int kSecondaryMotorID = 16;
 
     public static final double kGearRatio = 1.0;
     public static final double kTolerance = 20.0;
@@ -81,11 +94,24 @@ public final class Constants {
     };
 
     public static final double kMaxShootingDist = 4.0;
+
+    public static final RumblePack kRumbleScoreReady = new RumblePack(0.3, 0.2, Priority.MEDIUM);
+  }
+  
+  public static class HoodConstants {
+    public static final int kServoIdYehodi = 0;
+    public static final int kServoIdGoy = 0;
+    public static final double kMinDeg = 0;
+    public static final double kMaxDeg = 0;
+    public static final int kServoMin = 0;
+    public static final int kServoMax = 0;
+    public static final int kStartingPos = 0;
+    public static final double kServoDelay = 0.1;
   }
 
   public static class IntakeArmConstants {
     public static final int kAbsoluteEncoderID = 0;
-    public static final int kMotorID = 0;
+    public static final int kMotorID = 17;
 
     public static final double kP = 0;
     public static final double kI = 0;
@@ -107,18 +133,35 @@ public final class Constants {
     public static final int kClosedAngle = 0;
   }
 
-  public static class feederConstants {
-    public static final int kMotorID = 0;
+  public static class IntakeRollerConstants {
+    public static final int kMotorID = 18;
+
+    public static final double kIntakePower = 0.5;
+
+    public static final RumblePack kIntakeReadyRumble = new RumblePack(0.3, 0.2, Priority.LOW);
   }
 
-  public static class HoodConstants {
-    public static final int kServoIdYehodi = 0;
-    public static final int kServoIdGoy = 0;
-    public static final double kMinDeg = 0;
-    public static final double kMaxDeg = 0;
-    public static final int kServoMin = 0;
-    public static final int kServoMax = 0;
-    public static final int kStartingPos = 0;
-    public static final double kServoDelay = 0.1;
+  public static class FeederConstants {
+    public static final int kMotorID = 19;
+
+    public static final double kGrabPower = 0.2;
+  }
+
+  public final class ClimberConstants {
+    public static double kS = 0.0;
+    public static double kF = 0.0;
+    public static double kG = 0.0;
+    public static double kV = 0.0;
+    public static double kA = 0.0;
+    public static double kP = 0.0;
+    public static double kI = 0.0;
+    public static double kD = 0.0;
+    public static double kTolerance = 0.5;
+
+    public static int kMainMotorID = 20;
+    public static int kSecondaryMotorID = 21;
+
+    public static double kMetersPerRotation = 0.0;
+
   }
 }

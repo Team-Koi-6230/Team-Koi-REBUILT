@@ -2,10 +2,12 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
+import frc.robot.subsystems.FeederSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.Vision;
 
 import frc.robot.subsystems.ShooterSubsystem.ShooterState;
+import frc.robot.utils.RumbleSubsystem;
 
 public class ScoreCommand extends Command {
     public record ShooterPoint(
@@ -14,11 +16,18 @@ public class ScoreCommand extends Command {
     ) {}
 
     private final ShooterSubsystem shooterSubsystem;
+    private final FeederSubsystem feederSubsystem;
     private final Vision vision;
+    private final RumbleSubsystem rumble;
 
-    public ScoreCommand(ShooterSubsystem shooterSubsystem) {
+    private boolean firstTimeReady = true;
+
+    public ScoreCommand(ShooterSubsystem shooterSubsystem, FeederSubsystem feederSubsystem, RumbleSubsystem rumble) {
         this.shooterSubsystem = shooterSubsystem;
         this.vision = Vision.getInstance();
+        this.feederSubsystem = feederSubsystem;
+        this.rumble = rumble;
+        addRequirements(shooterSubsystem, feederSubsystem);
     }
 
     @Override
@@ -33,8 +42,14 @@ public class ScoreCommand extends Command {
         }
         ShooterPoint sp = interpolate(vHubDist);
         shooterSubsystem.setTargetRPM(sp.rpm);
+        // TODO: add hood logic here
         if (shooterSubsystem.getState() != ShooterState.AT_TARGET) return;
-        // we will be releasing the ball into the shooter here I guess, and prolly do some other stuff.
+        
+        if (firstTimeReady) {
+            rumble.rumble(Constants.ShooterConstants.kRumbleScoreReady);
+            firstTimeReady = false;
+        }
+        feederSubsystem.setVoltage(Constants.FeederConstants.kGrabPower);
     }
 
     public static ShooterPoint interpolate(double distance) {
@@ -64,5 +79,11 @@ public class ScoreCommand extends Command {
 
     private static double lerp(double a, double b, double t) {
         return a + (b - a) * t;
+    }
+
+    @Override
+    public void end(boolean interrupted) {
+        shooterSubsystem.setTargetRPM(0);
+        firstTimeReady = true;
     }
 }
