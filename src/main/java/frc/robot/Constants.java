@@ -1,9 +1,6 @@
 package frc.robot;
 
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import frc.robot.commands.ScoreCommand.ShooterPoint;
 import frc.robot.utils.RumbleSubsystem.Priority;
 import frc.robot.utils.RumblePack;
