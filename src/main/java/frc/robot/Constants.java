@@ -6,6 +6,8 @@ import frc.robot.utils.RumbleSubsystem.Priority;
 import frc.robot.utils.RumblePack;
 
 public final class Constants {
+  public static boolean disableHAL = false;
+
   public static class OperatorConstants {
 
     public static final int kDriverControllerPort = 0;
@@ -19,8 +21,6 @@ public final class Constants {
     public static final int kTeleopInterval = 25;
     public static final int kEndGameTime = 30;
   }
-
-  public static boolean disableHAL = false;
 
   public static class VisionConstants {
     public static final String kLimelightName = "limelight-front";
@@ -46,13 +46,13 @@ public final class Constants {
 
     public static final boolean kInverted = false;
 
-    public static final double kP = 0.0001;
+    public static final double kS = 0.2; // static friction
+    public static final double kV = 0.1665; // volts per RPS
+    public static final double kA = 0.002; // acceleration factor
+
+    public static final double kP = 0.003; // PID for fine-tune
     public static final double kI = 0.0;
     public static final double kD = 0.0;
-
-    public static final double kS = 0.1;
-    public static final double kV = 0.12;
-    public static final double kA = 0.01;
 
     // fake data for now
     public static final ShooterPoint[] kShooterLUT = {
@@ -74,14 +74,15 @@ public final class Constants {
     }
 
     public static final double kMaxShootingDist = 4.0;
-    public static final double kRadialRPMComp = 150; // what rpm we need to compensate when driving backwards from the hub @ max accel
+    public static final double kRadialRPMComp = 150; // what rpm we need to compensate when driving backwards from the
+                                                     // hub @ max accel
 
     public static final RumblePack kRumbleScoreReady = new RumblePack(0.3, 0.2, Priority.MEDIUM);
   }
 
   public static class HoodConstants {
     public static final int kServoRightID = 0;
-    public static final int kServoLeftID = 0;
+    public static final int kServoLeftID = 1;
     public static final double kMinDeg = 0;
     public static final double kMaxDeg = 0;
     public static final int kServoMin = 0;
@@ -151,7 +152,7 @@ public final class Constants {
 
     public static int kMainMotorID = 20;
     public static int kSecondaryMotorID = 21;
-    public static int kDutyCycleChannel = 0;
+    public static int kDutyCycleChannel = 1;
 
     public static int kDutyCycleOffset = 0;
 

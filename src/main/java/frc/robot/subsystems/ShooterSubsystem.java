@@ -1,7 +1,14 @@
 package frc.robot.subsystems;
 
 import frc.robot.Constants;
-
+import frc.robot.Constants.ShooterConstants;
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.system.plant.LinearSystemId;
+import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.simulation.FlywheelSim;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -31,44 +38,60 @@ public class ShooterSubsystem extends SubsystemBase {
   private ShooterState state = ShooterState.IDLE;
   private double targetRPM = Double.NaN;
 
+  private final FlywheelSim sim = new FlywheelSim(
+      LinearSystemId.identifyVelocitySystem(
+          Constants.ShooterConstants.kV,
+          Constants.ShooterConstants.kA),
+      DCMotor.getNeoVortex(2),
+      ShooterConstants.kGearRatio);
+
+  private final PIDController simPID = new PIDController(
+      ShooterConstants.kP,
+      ShooterConstants.kI,
+      ShooterConstants.kD);
+
+  private final SimpleMotorFeedforward simFF = new SimpleMotorFeedforward(
+      ShooterConstants.kS,
+      ShooterConstants.kV,
+      ShooterConstants.kA);
+
   public ShooterSubsystem() {
     m_motor = new SparkFlex(Constants.ShooterConstants.kMainMotorID, MotorType.kBrushless);
     encoder = m_motor.getEncoder();
 
     s_motor = new SparkFlex(Constants.ShooterConstants.kSecondaryMotorID, MotorType.kBrushless);
 
-
     SparkFlexConfig m_config = new SparkFlexConfig();
 
     m_config
-      .idleMode(IdleMode.kCoast)
-      .inverted(Constants.ShooterConstants.kInverted)
-      .voltageCompensation(12.0);
+        .idleMode(IdleMode.kCoast)
+        .inverted(Constants.ShooterConstants.kInverted)
+        .voltageCompensation(12.0);
 
     m_config.smartCurrentLimit(60, 80);
 
     m_config.encoder
-      .velocityConversionFactor(1.0 / Constants.ShooterConstants.kGearRatio);
+        .velocityConversionFactor(1.0 / Constants.ShooterConstants.kGearRatio);
 
     m_config.closedLoop
-      .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-      .pid(
-        Constants.ShooterConstants.kP, 
-        Constants.ShooterConstants.kI, 
-        Constants.ShooterConstants.kD 
-      )
-    .feedForward
+        .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+        .pid(
+            Constants.ShooterConstants.kP,
+            Constants.ShooterConstants.kI,
+            Constants.ShooterConstants.kD).feedForward
         .kS(Constants.ShooterConstants.kS)
         .kV(Constants.ShooterConstants.kV)
         .kA(Constants.ShooterConstants.kA);
 
-    m_motor.configure(m_config, com.revrobotics.ResetMode.kResetSafeParameters, com.revrobotics.PersistMode.kPersistParameters);
+    m_motor.configure(m_config, com.revrobotics.ResetMode.kResetSafeParameters,
+        com.revrobotics.PersistMode.kPersistParameters);
 
     SparkFlexConfig s_config = new SparkFlexConfig();
 
     s_config.follow(m_motor, !Constants.ShooterConstants.kInverted);
 
-    s_motor.configure(s_config, com.revrobotics.ResetMode.kResetSafeParameters, com.revrobotics.PersistMode.kPersistParameters);
+    s_motor.configure(s_config, com.revrobotics.ResetMode.kResetSafeParameters,
+        com.revrobotics.PersistMode.kPersistParameters);
 
     closedLoop = m_motor.getClosedLoopController();
   }
@@ -80,20 +103,23 @@ public class ShooterSubsystem extends SubsystemBase {
     });
   }
 
-  public ShooterState getState() { 
-    return state; 
+  public ShooterState getState() {
+    return state;
   }
 
-  public void setTargetRPM(double targetRPM) { 
-    this.targetRPM = targetRPM; 
+  public void setTargetRPM(double targetRPM) {
+    this.targetRPM = targetRPM;
   }
 
-  public double getTargetRPM() { 
-    return this.targetRPM; 
+  public double getTargetRPM() {
+    return this.targetRPM;
   }
 
-  public double getVelocity() { 
-    return encoder.getVelocity(); 
+  public double getVelocity() {
+    if (!RobotBase.isReal()) {
+      return sim.getAngularVelocityRPM();
+    }
+    return encoder.getVelocity();
   }
 
   public boolean isAtTargetVelocity() {
@@ -103,16 +129,17 @@ public class ShooterSubsystem extends SubsystemBase {
     return Math.abs(targetRPM - getVelocity()) < Constants.ShooterConstants.kTolerance;
   }
 
-  public void stop() { 
+  public void stop() {
     this.targetRPM = Double.NaN;
   }
 
   @Override
   public void periodic() {
-    
-     if (!Double.isNaN(targetRPM)) { 
-      closedLoop.setSetpoint(targetRPM, ControlType.kVelocity);
-      
+
+    if (!Double.isNaN(targetRPM)) {
+      if (RobotBase.isReal())
+        closedLoop.setSetpoint(targetRPM, ControlType.kVelocity);
+
       if (isAtTargetVelocity()) {
         state = ShooterState.AT_TARGET;
       } else {
@@ -126,10 +153,26 @@ public class ShooterSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("Shooter/CurrentRPM", getVelocity());
     SmartDashboard.putNumber("Shooter/TargetRPM", Double.isNaN(targetRPM) ? 0 : targetRPM);
     SmartDashboard.putString("Shooter/State", state.toString());
-    SmartDashboard.putNumber("Shooter/Current", m_motor.getOutputCurrent());
+    if (RobotBase.isReal())
+      SmartDashboard.putNumber("Shooter/Current", m_motor.getOutputCurrent());
+    else
+      SmartDashboard.putNumber("Shooter/Current", sim.getInputVoltage());
   }
 
   @Override
   public void simulationPeriodic() {
+    if (Double.isNaN(targetRPM)) {
+      sim.setInput(0.0);
+      return;
+    }
+
+    double currentRPM = sim.getAngularVelocityRPM();
+
+    double pidOut = simPID.calculate(currentRPM, targetRPM);
+    double ffOut = simFF.calculate(targetRPM / 60.0); // RPS
+
+    sim.setInputVoltage(MathUtil.clamp(pidOut + ffOut, -12.0, 12.0));
+
+    sim.update(0.02);
   }
 }
