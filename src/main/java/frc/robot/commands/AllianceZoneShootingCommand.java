@@ -1,6 +1,7 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.Constants;
 import frc.robot.subsystems.FeederSubsystem;
 import frc.robot.subsystems.HoodSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
@@ -19,13 +20,26 @@ public class AllianceZoneShootingCommand extends Command {
 
     @Override
     public void initialize() {
+        shooterSubsystem.setTargetRPM(Constants.ShooterConstants.kTargetRPM);
+
+        hoodSubsystem.setAngle(Constants.HoodConstants.kAllianceAngle);
     }
 
     @Override
     public void execute() {
+        if (shooterSubsystem.isAtTargetVelocity()) {
+            feederSubsystem.setVoltage(Constants.FeederConstants.kVoltage);
+        }
+        else {
+            feederSubsystem.setVoltage(0.0);
+        }
+
+
     }
 
     @Override
     public void end(boolean interrupted) {
+        shooterSubsystem.setTargetRPM(0.0);
+        feederSubsystem.setVoltage(0.0);
     }
 }

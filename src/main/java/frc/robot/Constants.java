@@ -54,6 +54,8 @@ public final class Constants {
     public static final double kI = 0.0;
     public static final double kD = 0.0;
 
+    public static final double kTargetRPM = 0.0;
+
     // fake data for now
     public static final ShooterPoint[] kShooterLUT = {
         new ShooterPoint(2.0, 3100, 45),
@@ -89,6 +91,8 @@ public final class Constants {
     public static final int kServoMax = 0;
     public static final int kStartingPos = 0;
     public static final double kServoDelay = 0.1;
+
+    public static final double kAllianceAngle = 0.0;
   }
 
   public static class IntakeArmConstants {
@@ -127,6 +131,8 @@ public final class Constants {
     public static final int kMotorID = 19;
 
     public static final double kGrabPower = 0.2;
+
+    public static final double kVoltage = 0.0;
   }
 
   public final class ClimberConstants {
