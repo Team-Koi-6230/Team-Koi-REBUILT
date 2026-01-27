@@ -28,7 +28,9 @@ public class IntakeArmSubsystem extends SubsystemBase {
         IDLE,
         OPEN,
         CLOSED,
-        MOVING
+        MOVING,
+        SHAKE_MAX,
+        SHAKE_MIN
     }
 
     public IntakeArmState state = IntakeArmState.IDLE;
@@ -98,6 +100,16 @@ public class IntakeArmSubsystem extends SubsystemBase {
         return Math.abs(IntakeArmConstants.kOpenAngle - getAngle()) < IntakeArmConstants.kTolerance;
     }
 
+    // returns true if the arm is in the max shaking angle
+    private boolean isAtShakeMax() {
+        return Math.abs(IntakeArmConstants.kShakeMax - getAngle()) < IntakeArmConstants.kTolerance;
+    }
+
+    // returns true if the arm is in the minimum shaking angle
+    private boolean isAtShakeMin() {
+        return Math.abs(IntakeArmConstants.kShakeMin - getAngle()) < IntakeArmConstants.kTolerance;
+    } 
+
     public void OpenArm() {
         setAngle(IntakeArmConstants.kOpenAngle);
     }
@@ -120,6 +132,10 @@ public class IntakeArmSubsystem extends SubsystemBase {
             state = IntakeArmState.OPEN;
         } else if (isClosed()) {
             state = IntakeArmState.CLOSED;
+        } else if (isAtShakeMax()) {
+            state = IntakeArmState.SHAKE_MAX;
+        } else if (isAtShakeMin()) {
+            state = IntakeArmState.SHAKE_MIN;
         }
     }
 
