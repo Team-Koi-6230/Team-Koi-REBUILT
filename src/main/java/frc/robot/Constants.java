@@ -1,7 +1,6 @@
 package frc.robot;
 
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
-import frc.robot.commands.ScoreCommand.ShooterPoint;
 import frc.robot.utils.RumbleSubsystem.Priority;
 import frc.robot.utils.RumblePack;
 
@@ -54,7 +53,13 @@ public final class Constants {
     public static final double kI = 0.0;
     public static final double kD = 0.0;
 
-    public static final double kTargetRPM = 0.0;
+    public static final double kNeutralZoneShootingRPM = 1000;
+
+    public record ShooterPoint(
+            double distanceMeters,
+            double rpm,
+            double hoodAngle) {
+    }
 
     // fake data for now
     public static final ShooterPoint[] kShooterLUT = {
@@ -80,6 +85,13 @@ public final class Constants {
                                                      // hub @ max accel
 
     public static final RumblePack kRumbleScoreReady = new RumblePack(0.3, 0.2, Priority.MEDIUM);
+
+    public static ShooterPoint interpolate(double distance) {
+        return new ShooterPoint(
+                distance,
+                Constants.ShooterConstants.kRpmMap.get(distance),
+                Constants.ShooterConstants.kHoodMap.get(distance));
+    }
   }
 
   public static class HoodConstants {

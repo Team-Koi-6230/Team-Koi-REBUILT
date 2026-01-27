@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import frc.robot.Constants.IntakeArmConstants;
+import frc.robot.subsystems.Superstructure.WantedState;
 
 public class IntakeArmSubsystem extends SubsystemBase {
     private final DutyCycleEncoder m_absoluteEncoder;
@@ -34,6 +35,7 @@ public class IntakeArmSubsystem extends SubsystemBase {
     }
 
     public IntakeArmState state = IntakeArmState.IDLE;
+    private WantedState currentWantedState;
 
     public IntakeArmSubsystem() {
         // set absolute encoder
@@ -141,5 +143,13 @@ public class IntakeArmSubsystem extends SubsystemBase {
 
     @Override
     public void simulationPeriodic() {
+    }
+
+    public boolean isReady() {
+        return false; // Make me ready!
+    }
+
+    public void setWantedState(WantedState wantedState) {
+        this.currentWantedState = wantedState;
     }
 }

@@ -1,23 +1,21 @@
 package frc.robot;
 
 import frc.robot.Constants.OperatorConstants;
-import frc.robot.commands.DriveRelativeToHubCommand;
-import frc.robot.commands.IntakeCommand;
-import frc.robot.commands.ScoreCommand;
 import frc.robot.subsystems.ClimberSubsystem;
 import frc.robot.subsystems.FeederSubsystem;
 import frc.robot.subsystems.HoodSubsystem;
 import frc.robot.subsystems.IntakeArmSubsystem;
 import frc.robot.subsystems.IntakeRollerSubsytem;
 import frc.robot.subsystems.ShooterSubsystem;
+import frc.robot.subsystems.Superstructure;
 import frc.robot.subsystems.SwerveSubsystem;
+import frc.robot.subsystems.Superstructure.WantedState;
 import frc.robot.utils.RumbleSubsystem;
 import swervelib.SwerveInputStream;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 
 public class RobotContainer {
@@ -51,7 +49,7 @@ public class RobotContainer {
     shooterSubsystem = superstructure.getShooterSubsystem();
     feederSubsystem = superstructure.getFeederSubsystem();
     intakeArmSubsystem = superstructure.getIntakeArmSubsystem();
-    intakeRollerSubsytem = superstructure.getIntakeRollerSubsytem();
+    intakeRollerSubsytem = superstructure.getIntakeRollerSubsystem();
     climberSubsystem = superstructure.getClimberSubsystem();
     hoodSubsystem = superstructure.getHoodSubsystem();
     drivebase = superstructure.getDrivebase();
@@ -74,48 +72,19 @@ public class RobotContainer {
   }
 
   private void configureBindings() {
-    if (!RobotBase.isReal()) {
-      configureBindingsReal();
-    } else {
-      configureBindingsSim();
-    }
-  }
-
-  private void configureBindingsReal() {
     rumbleSubsystem.setControllers(m_driverController, m_operatorController);
 
     Command driveFieldOrientedAngularVelocity = drivebase.driveFieldOriented(driveAngularVelocity);
-    Command driveHubRelative = new DriveRelativeToHubCommand(drivebase, driveAngularVelocity);
-    Command scoreCommand = new ScoreCommand(shooterSubsystem, hoodSubsystem, feederSubsystem);
-    Command intakeCommand = new IntakeCommand(intakeArmSubsystem, intakeRollerSubsytem);
-
     drivebase.setDefaultCommand(driveFieldOrientedAngularVelocity);
-    m_driverController.rightBumper().whileTrue(driveHubRelative);
-    m_driverController.rightTrigger().whileTrue(scoreCommand);
-    m_driverController.leftTrigger().whileTrue(intakeCommand);
 
-    m_driverController.a().onTrue(Commands.runOnce(drivebase::zeroGyro));
+    m_driverController.rightBumper().onTrue(
+        Commands.runOnce(() -> superstructure.setWantedState(WantedState.PREPARING_SHOOTER), superstructure));
 
-    CommandScheduler.getInstance().registerSubsystem(new SubsystemBase() {
-      @Override
-      public void periodic() {
-        superstructure.periodic();
-      }
-    });
-  }
+    m_driverController.rightBumper().onFalse(
+        Commands.runOnce(() -> superstructure.setWantedState(WantedState.IDLE), superstructure));
 
-  private void configureBindingsSim() {
-    shooterSubsystem.setTargetRPM(1000);
-
-    m_driverController.a().whileTrue(
-        Commands.run(() -> {
-          double current = shooterSubsystem.getTargetRPM();
-          if (!Double.isNaN(current)) {
-            shooterSubsystem.setTargetRPM(current + 10);
-          } else {
-            shooterSubsystem.setTargetRPM(1000); // some default starting RPM
-          }
-        }, shooterSubsystem));
+    m_driverController.a().onTrue(
+        Commands.runOnce(drivebase::zeroGyro));
   }
 
   public Command getAutonomousCommand() {

@@ -20,7 +20,7 @@ public class AllianceZoneShootingCommand extends Command {
 
     @Override
     public void initialize() {
-        shooterSubsystem.setTargetRPM(Constants.ShooterConstants.kTargetRPM);
+        shooterSubsystem.setTargetRPM(Constants.ShooterConstants.kNeutralZoneShootingRPM);
 
         hoodSubsystem.setAngle(Constants.HoodConstants.kAllianceAngle);
     }

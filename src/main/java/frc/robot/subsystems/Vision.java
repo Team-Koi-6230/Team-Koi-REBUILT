@@ -2,7 +2,9 @@ package frc.robot.subsystems;
 
 import frc.robot.Constants;
 import frc.robot.FieldConstants;
+import frc.robot.FieldConstants.LinesVertical;
 import swervelib.SwerveDrive;
+import frc.robot.utils.AllianceFlipUtil;
 import frc.robot.utils.LimelightHelpers;
 import frc.robot.utils.LimelightHelpers.PoseEstimate;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -52,10 +54,20 @@ public class Vision {
 
     public Pose2d getPosition() {return currentPosition;}
 
-    public boolean isHubLocked() {
+    public boolean isInAllianceZone() {
+        var x = AllianceFlipUtil.applyX(currentPosition.getX());
+        return x < LinesVertical.allianceZone;
+    }
+
+    public Translation2d getDistanceToHub() {
+        return getPosition().getTranslation()
+                .minus(AllianceFlipUtil.apply(FieldConstants.Hub.innerCenterPoint).toTranslation2d());
+    }
+
+    /*public boolean isHubLocked() {
         double angleToHub = new Translation2d(FieldConstants.Hub.innerCenterPoint.getX(), FieldConstants.Hub.innerCenterPoint.getY())
                 .minus(currentPosition.getTranslation())
                 .getAngle().getDegrees();
         return angleToHub <= Constants.VisionConstants.kAimTolerance;
-    }
+    }*/
 }

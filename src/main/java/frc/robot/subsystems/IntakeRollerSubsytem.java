@@ -1,7 +1,7 @@
 package frc.robot.subsystems;
 
 import frc.robot.Constants;
-
+import frc.robot.subsystems.Superstructure.WantedState;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.revrobotics.spark.SparkMax;
@@ -15,6 +15,8 @@ public class IntakeRollerSubsytem extends SubsystemBase {
 
     private final SparkMax m_motor;
     private IntakeRollerState state;
+    private WantedState currentWantedState;
+
 
     public IntakeRollerSubsytem() {
         m_motor = new SparkMax(Constants.IntakeRollerConstants.kMotorID, MotorType.kBrushless);
@@ -42,5 +44,13 @@ public class IntakeRollerSubsytem extends SubsystemBase {
 
     @Override
     public void simulationPeriodic() {
+    }
+
+    public boolean isReady() {
+        return false; // Make me ready!
+    }
+
+    public void setWantedState(WantedState wantedState) {
+        this.currentWantedState = wantedState;
     }
 }

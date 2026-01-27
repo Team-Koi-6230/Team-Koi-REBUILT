@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
+import frc.robot.subsystems.Superstructure.WantedState;
 
 public class ClimberSubsystem extends SubsystemBase {
   public enum ClimberState {
@@ -25,6 +26,7 @@ public class ClimberSubsystem extends SubsystemBase {
 
   private double targetHeight = 0.0;
   private ClimberState state = ClimberState.MOVING_GROUND;
+  private WantedState currentWantedState;
   private final SparkMax m_motor;
   private final SparkMax s_motor;
   private final RelativeEncoder encoder;
@@ -36,7 +38,8 @@ public class ClimberSubsystem extends SubsystemBase {
     m_motor = new SparkMax(Constants.ClimberConstants.kMainMotorID, MotorType.kBrushless);
     s_motor = new SparkMax(Constants.ClimberConstants.kSecondaryMotorID, MotorType.kBrushless);
     encoder = m_motor.getEncoder();
-    abs_encoder = new DutyCycleEncoder(Constants.ClimberConstants.kDutyCycleChannel, Constants.ClimberConstants.kMetersPerRotation, Constants.ClimberConstants.kDutyCycleOffset);
+    abs_encoder = new DutyCycleEncoder(Constants.ClimberConstants.kDutyCycleChannel,
+        Constants.ClimberConstants.kMetersPerRotation, Constants.ClimberConstants.kDutyCycleOffset);
     closedLoop = m_motor.getClosedLoopController();
     SparkMaxConfig config = new SparkMaxConfig();
     SparkMaxConfig followerConfig = new SparkMaxConfig();
@@ -76,7 +79,6 @@ public class ClimberSubsystem extends SubsystemBase {
     followerConfig.follow(m_motor, true);
     s_motor.configure(followerConfig, com.revrobotics.ResetMode.kResetSafeParameters,
         com.revrobotics.PersistMode.kPersistParameters);
-
 
     encoder.setPosition(abs_encoder.get());
   }
@@ -124,19 +126,26 @@ public class ClimberSubsystem extends SubsystemBase {
     if (isGrounded) {
       closedLoop.setSetpoint(targetHeight, ControlType.kPosition, ClosedLoopSlot.kSlot0);
       if (Math.abs(targetHeight - getHeight()) < Constants.ClimberConstants.kTolerance) {
-      state = ClimberState.AT_TARGET_GROUND;
+        state = ClimberState.AT_TARGET_GROUND;
+      } else {
+        state = ClimberState.MOVING_GROUND;
+      }
     } else {
-      state = ClimberState.MOVING_GROUND;
-    }
-    }
-    else {
       closedLoop.setSetpoint(targetHeight, ControlType.kPosition, ClosedLoopSlot.kSlot1);
       if (Math.abs(targetHeight - getHeight()) < Constants.ClimberConstants.kTolerance) {
-      state = ClimberState.AT_TARGET_HANG;
-    } else {
-      state = ClimberState.MOVING_GROUND;
+        state = ClimberState.AT_TARGET_HANG;
+      } else {
+        state = ClimberState.MOVING_GROUND;
+      }
     }
-    }
-    
+
+  }
+
+  public boolean isReady() {
+    return false; // Make me ready!
+  }
+
+  public void setWantedState(WantedState wantedState) {
+    this.currentWantedState = wantedState;
   }
 }

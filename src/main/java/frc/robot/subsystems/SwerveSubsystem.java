@@ -36,6 +36,9 @@ import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Config;
 import frc.robot.Constants;
 import frc.robot.FieldConstants;
+import frc.robot.Constants.ShooterConstants;
+import frc.robot.subsystems.Superstructure.WantedState;
+import frc.robot.utils.AllianceFlipUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -84,6 +87,7 @@ public class SwerveSubsystem extends SubsystemBase {
     private final PIDController RotationPID;
 
     private SwerveState state = SwerveState.IDLE;
+    private WantedState wantedState = WantedState.IDLE;
 
     /**
      * Initialize {@link SwerveDrive} with the directory provided.
@@ -176,6 +180,14 @@ public class SwerveSubsystem extends SubsystemBase {
 
     @Override
     public void simulationPeriodic() {
+    }
+
+    public void setWantedState(WantedState wantedState) {
+        this.wantedState = wantedState;
+    }
+
+    public boolean isReady() {
+        return true;
     }
 
     /**
@@ -458,10 +470,8 @@ public class SwerveSubsystem extends SubsystemBase {
      * @param velocity Velocity according to the field.
      */
     public Command driveFieldOriented(Supplier<ChassisSpeeds> velocity) {
-        state = SwerveState.TELEOP;
-        return run(() -> {
-            swerveDrive.driveFieldOriented(velocity.get());
-        });
+
+        return run(() -> driveBasedOnState(velocity.get()));
     }
 
     // #endregion
@@ -495,6 +505,27 @@ public class SwerveSubsystem extends SubsystemBase {
                 rotation,
                 fieldRelative,
                 false); // Open loop is disabled since it shouldn't be used most of the time.
+    }
+
+    public void driveBasedOnState(ChassisSpeeds velocity) {
+        state = SwerveState.TELEOP;
+        System.out.println(wantedState.name());
+        if (wantedState == WantedState.PREPARING_SHOOTER || wantedState == WantedState.SHOOTING) {
+            double dist = Vision.getInstance().getDistanceToHub().getNorm();
+            if (dist > ShooterConstants.kMaxShootingDist) {
+                System.out.println("The robot is too far");
+                swerveDrive.driveFieldOriented(velocity);
+                return;
+            }
+            driveWhileAiming(
+                velocity,
+                new Pose2d(
+                        AllianceFlipUtil.apply(FieldConstants.Hub.innerCenterPoint).toTranslation2d(),
+                        new Rotation2d()));
+            return;
+        }
+
+        swerveDrive.driveFieldOriented(velocity);
     }
 
     /**
