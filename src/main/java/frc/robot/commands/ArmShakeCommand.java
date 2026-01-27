@@ -68,6 +68,6 @@ public class ArmShakeCommand extends Command {
 
     @Override
     public void end(boolean interrupted) {
-        intakeArmSubsystem.setAngle(IntakeArmConstants.kClosedAngle);
+        intakeArmSubsystem.CloseArm();
     }
 } 
