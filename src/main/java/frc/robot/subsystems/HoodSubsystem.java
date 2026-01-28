@@ -27,7 +27,6 @@ public class HoodSubsystem extends SubsystemBase {
 
         // Start at initial position
         setAngle(Constants.HoodConstants.kStartingPos);
-        targetAngle = Constants.HoodConstants.kStartingPos;
         state = HoodState.AT_STARTING_POS;
     }
 
@@ -52,7 +51,7 @@ public class HoodSubsystem extends SubsystemBase {
 
         Timer.delay(Constants.HoodConstants.kServoDelay);
 
-        state = HoodState.AT_TARGET;
+        state = degrees == Constants.HoodConstants.kStartingPos ? HoodState.AT_STARTING_POS : HoodState.AT_TARGET;
     }
 
     /** Returns current hood state (AT_TARGET or MOVING) */
