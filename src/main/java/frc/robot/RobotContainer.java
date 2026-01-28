@@ -12,13 +12,18 @@ import frc.robot.subsystems.SwerveSubsystem;
 import frc.robot.subsystems.Superstructure.WantedState;
 import frc.robot.utils.RumbleSubsystem;
 import swervelib.SwerveInputStream;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 
 public class RobotContainer {
+
+  private final SendableChooser<Command> autonChooser = new SendableChooser<>();
 
   private final CommandXboxController m_driverController;
   private final CommandXboxController m_operatorController;
@@ -38,6 +43,7 @@ public class RobotContainer {
   private final SwerveInputStream driveDirectAngle;
 
   public RobotContainer() {
+
     // Controllers
     m_driverController = new CommandXboxController(OperatorConstants.kDriverControllerPort);
     m_operatorController = new CommandXboxController(OperatorConstants.kOperatorControllerPort);
@@ -53,6 +59,12 @@ public class RobotContainer {
     climberSubsystem = superstructure.getClimberSubsystem();
     hoodSubsystem = superstructure.getHoodSubsystem();
     drivebase = superstructure.getDrivebase();
+
+    autonChooser.setDefaultOption("get off the line", new RunCommand(() -> {
+      drivebase.zeroGyro();
+      drivebase.drive(new ChassisSpeeds(1, 0, 0));
+
+    }, drivebase).withTimeout(4));
 
     // Input streams
     driveAngularVelocity = SwerveInputStream.of(drivebase.getSwerveDrive(),
@@ -88,6 +100,6 @@ public class RobotContainer {
   }
 
   public Command getAutonomousCommand() {
-    return null;
+    return autonChooser.getSelected();
   }
 }
