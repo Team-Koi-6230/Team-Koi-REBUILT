@@ -89,7 +89,7 @@ public class HoodSubsystem extends SubsystemBase {
     }
 
     public boolean isReady() {
-        return state == HoodState.AT_TARGET; // Make me ready!
+        return state == HoodState.AT_TARGET;
     }
 
     private void prepareHood() {
