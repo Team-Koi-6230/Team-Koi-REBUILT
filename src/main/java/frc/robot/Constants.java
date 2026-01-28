@@ -39,7 +39,7 @@ public final class Constants {
     public static final double kMaxStrafe = 0.5; // max strafe speed while aiming
     public static final double kVisionPeriod = 0.1; // 10Hz
     public static final double kTargetErrorTolerance = Math.toRadians(3);
-    public static final double kPr = 0.15, kIr = 0.0, kDr = 0.02;
+    public static final double kPr = 0.3, kIr = 0.0, kDr = 0.02;
   }
 
   public static class ShooterConstants {
@@ -51,9 +51,9 @@ public final class Constants {
 
     public static final boolean kInverted = false;
 
-    public static final double kS = 0.2; // static friction
-    public static final double kV = 0.1665; // volts per RPS
-    public static final double kA = 0.002; // acceleration factor
+    public static final double kS = 0.2;
+    public static final double kV = 0.1665;
+    public static final double kA = 0.002;
 
     public static final double kP = 0.003; // PID for fine-tune
     public static final double kI = 0.0;
@@ -64,6 +64,39 @@ public final class Constants {
     public static final InterpolatingDoubleTreeMap kShotHoodAngleMap = new InterpolatingDoubleTreeMap();
     public static final InterpolatingDoubleTreeMap kShotFlywheelSpeedMap = new InterpolatingDoubleTreeMap();
     public static final InterpolatingDoubleTreeMap kTimeOfFlightMap = new InterpolatingDoubleTreeMap();
+
+    private static void fillMap(
+        InterpolatingDoubleTreeMap map,
+        double[] distances,
+        double[] values) {
+      if (distances.length != values.length) {
+        throw new IllegalArgumentException("Distances and values must be same length");
+      }
+
+      for (int i = 0; i < distances.length; i++) {
+        map.put(distances[i], values[i]);
+      }
+    }
+
+    static {
+      // Hood angles (deg)
+      fillMap(
+          kShotHoodAngleMap,
+          new double[] { 1.3, 2.0, 3.0, 4.0, 5.5 },
+          new double[] { 18.0, 22.0, 27.0, 31.0, 35.0 });
+
+      // Flywheel speeds (RPM)
+      fillMap(
+          kShotFlywheelSpeedMap,
+          new double[] { 1.3, 2.0, 3.0, 4.0, 5.5 },
+          new double[] { 2100, 2250, 2500, 2700, 2950 });
+
+      // Time of flight (seconds)
+      fillMap(
+          kTimeOfFlightMap,
+          new double[] { 1.3, 2.0, 3.0, 4.0, 5.5 },
+          new double[] { 0.85, 0.95, 1.05, 1.12, 1.18 });
+    }
 
     public static final double kMaxShootingDist = 4.0;
     public static final double kRadialRPMComp = 150; // what rpm we need to compensate when driving backwards from the

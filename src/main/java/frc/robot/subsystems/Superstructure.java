@@ -4,6 +4,7 @@ import java.io.File;
 
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.ClimberSubsystem.ClimberState;
@@ -54,6 +55,8 @@ public class Superstructure extends SubsystemBase {
     private WantedState previousWantedState = WantedState.IDLE;
     private CurrentState currentState = CurrentState.IDLE;
 
+    private final Field2d field = new Field2d();
+
     /* ================= SUBSYSTEMS ================= */
 
     private final RumbleSubsystem rumbleSubsystem;
@@ -94,12 +97,15 @@ public class Superstructure extends SubsystemBase {
 
         if (wantedState == WantedState.SHOOTING || wantedState == WantedState.PREPARING_SHOOTER) {
             currentShootingParameters = ShooterCalc.getParameters();
+            field.getObject("target").setPose(currentShootingParameters.target());
         }
 
         updateCurrentState();
 
         SmartDashboard.putString("superstructure/Wanted superstate", wantedState.name());
         SmartDashboard.putString("superstructure/superstate", currentState.name());
+        field.setRobotPose(drivebase.getPose());
+        SmartDashboard.putData("superstructure/Aiming/Field", field);
     }
 
     /* ================= STATE FLOW ================= */

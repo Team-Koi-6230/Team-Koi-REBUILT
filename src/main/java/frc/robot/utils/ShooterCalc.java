@@ -5,11 +5,10 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.robot.Constants;
 import frc.robot.FieldConstants;
 import frc.robot.subsystems.Superstructure;
-import frc.robot.subsystems.SwerveSubsystem;
-import frc.robot.subsystems.SwerveSubsystem.HubRelativeVelocity;
 
 public class ShooterCalc {
     private static final InterpolatingDoubleTreeMap shotHoodAngleMap = Constants.ShooterConstants.kShotHoodAngleMap;
@@ -17,6 +16,8 @@ public class ShooterCalc {
     private static final InterpolatingDoubleTreeMap timeOfFlightMap = Constants.ShooterConstants.kTimeOfFlightMap;
 
     private static final LinearFilter hoodFilter = LinearFilter.movingAverage((int) (0.1 / Constants.loopPeriodSecs));
+    private static final LinearFilter xFilter = LinearFilter.singlePoleIIR(0.1, 0.02);
+    private static final LinearFilter yFilter = LinearFilter.singlePoleIIR(0.1, 0.02);
 
     public record ShootingParameters(
             boolean isValid,
@@ -25,52 +26,48 @@ public class ShooterCalc {
             Pose2d target) {
     }
 
-public static ShootingParameters getParameters() {
-    // Get current robot pose
-    SwerveSubsystem swerveDrive = Superstructure.getInstance().getDrivebase();
-    Pose2d robotPose = swerveDrive.getPose();
+    public static ShootingParameters getParameters() {
+        var swerve = Superstructure.getInstance().getDrivebase();
+        Pose2d robotPose = swerve.getPose();
+        Translation2d hubPos = FieldConstants.Hub.innerCenterPoint.toTranslation2d();
 
-    // Base distance to hub
-    Translation2d hubPos = FieldConstants.Hub.innerCenterPoint.toTranslation2d();
-    double distance = robotPose.getTranslation().getDistance(hubPos);
+        // 1. Get Distance
+        double distance = robotPose.getTranslation().getDistance(hubPos);
 
-    // Check if in valid shooting range
-    if (distance < 0 || distance > Constants.ShooterConstants.kMaxShootingDist) {
-        return new ShootingParameters(false, 0.0, 0.0, new Pose2d());
+        // Guard Clause
+        if (distance < 0 || distance > Constants.ShooterConstants.kMaxShootingDist) {
+            return new ShootingParameters(false, 0.0, 0.0, new Pose2d());
+        }
+
+        double timeOfFlight = timeOfFlightMap.get(distance);
+
+        // 2. Get Raw Velocity
+        ChassisSpeeds fieldSpeeds = swerve.getFieldVelocity();
+
+        // 3. FILTER THE VELOCITY (The Fix)
+        // We smooth the X and Y components individually to remove sensor noise
+        double smoothVx = xFilter.calculate(fieldSpeeds.vxMetersPerSecond);
+        double smoothVy = yFilter.calculate(fieldSpeeds.vyMetersPerSecond);
+
+        Translation2d smoothedVelocity = new Translation2d(smoothVx, smoothVy);
+
+        // 4. Calculate Lead with Smoothed Data
+        // Virtual Target = Hub - (Velocity * Time)
+        Translation2d leadOffset = smoothedVelocity.times(timeOfFlight);
+        Translation2d virtualTarget = hubPos.minus(leadOffset);
+
+        // 5. Final Calculations
+        double leadDistance = robotPose.getTranslation().getDistance(virtualTarget);
+
+        double hoodAngle = hoodFilter.calculate(shotHoodAngleMap.get(leadDistance));
+        double flywheelSpeed = shotFlywheelSpeedMap.get(leadDistance);
+
+        return new ShootingParameters(
+                true,
+                hoodAngle,
+                flywheelSpeed,
+                new Pose2d(virtualTarget, new Rotation2d()));
     }
-
-    // Lead the shot based on robot velocity
-    HubRelativeVelocity hubVel = swerveDrive.getHubRelativeVelocity();
-    double timeOfFlight = timeOfFlightMap.get(distance);
-
-    // Compute lead offsets
-    double leadRadialOffset = hubVel.radialSpeed() * timeOfFlight;
-    double leadStrafeOffset = hubVel.strafeSpeed() * timeOfFlight;
-
-    // Create lead-corrected target
-    Translation2d leadTarget = hubPos.minus(new Translation2d(leadRadialOffset, leadStrafeOffset));
-
-    // Distance to lead target
-    double leadDistance = robotPose.getTranslation().getDistance(leadTarget);
-
-    // Get hood angle and flywheel speed from lookup tables
-    double hoodAngle = shotHoodAngleMap.get(leadDistance);
-    double baseFlywheelSpeed = shotFlywheelSpeedMap.get(leadDistance);
-
-    // Apply radial speed compensation to flywheel RPM
-    double radialComp = Constants.ShooterConstants.kRadialRPMComp * hubVel.radialSpeed();
-    double finalFlywheelSpeed = baseFlywheelSpeed + radialComp;
-
-    // Filter hood angle for smooth servo movement
-    hoodAngle = hoodFilter.calculate(hoodAngle);
-
-    return new ShootingParameters(
-            true,
-            hoodAngle,
-            finalFlywheelSpeed,
-            new Pose2d(leadTarget.getX(), leadTarget.getY(), new Rotation2d())
-    );
-}
 
     public static void resetHoodFilter() {
         hoodFilter.reset();
