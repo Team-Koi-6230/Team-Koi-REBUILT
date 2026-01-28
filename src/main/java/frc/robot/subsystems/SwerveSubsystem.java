@@ -519,9 +519,7 @@ public class SwerveSubsystem extends SubsystemBase {
             }
             driveWhileAiming(
                 velocity,
-                new Pose2d(
-                        AllianceFlipUtil.apply(FieldConstants.Hub.innerCenterPoint).toTranslation2d(),
-                        new Rotation2d()));
+                Superstructure.getInstance().getShooterParameters().target());
             return;
         }
 

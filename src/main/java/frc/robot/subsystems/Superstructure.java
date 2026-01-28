@@ -15,6 +15,8 @@ import frc.robot.subsystems.ShooterSubsystem.ShooterState;
 import frc.robot.subsystems.SwerveSubsystem.SwerveState;
 import frc.robot.utils.GameDataSubsystem;
 import frc.robot.utils.RumbleSubsystem;
+import frc.robot.utils.ShooterCalc;
+import frc.robot.utils.ShooterCalc.ShootingParameters;
 
 public class Superstructure extends SubsystemBase {
     private static Superstructure instance;
@@ -88,6 +90,10 @@ public class Superstructure extends SubsystemBase {
         if (wantedState != previousWantedState) {
             onWantedStateChange();
             previousWantedState = wantedState;
+        }
+
+        if (wantedState == WantedState.SHOOTING || wantedState == WantedState.PREPARING_SHOOTER) {
+            currentShootingParameters = ShooterCalc.getParameters();
         }
 
         updateCurrentState();
@@ -205,5 +211,11 @@ public class Superstructure extends SubsystemBase {
 
     public double getSwerveHubRelativeStrafeSpeed() {
         return drivebase.getHubRelativeVelocity().radialSpeed();
+    }
+
+    private ShootingParameters currentShootingParameters;
+
+    public ShootingParameters getShooterParameters() {
+        return currentShootingParameters;
     }
 }

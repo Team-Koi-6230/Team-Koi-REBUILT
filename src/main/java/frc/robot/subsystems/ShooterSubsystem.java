@@ -124,16 +124,7 @@ public class ShooterSubsystem extends SubsystemBase {
     }
 
     private void score() {
-        double dist = Vision.getInstance().getDistanceToHub().getNorm();
-        if (dist > Constants.ShooterConstants.kMaxShootingDist) {
-            shootToAllianceZone();
-            return;
-        }
-        double visionRPM = Constants.ShooterConstants.interpolate(dist).rpm();
-        double finalRPM = visionRPM
-                + Constants.ShooterConstants.kRadialRPMComp
-                * Superstructure.getInstance().getSwerveHubRelativeRadialSpeed();
-        setTargetRPM(finalRPM);
+        setTargetRPM(Superstructure.getInstance().getShooterParameters().flywheelSpeed());
     }
 
     private void shootToAllianceZone() {

@@ -1,6 +1,9 @@
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
+import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
+import edu.wpi.first.math.interpolation.InverseInterpolator;
 import edu.wpi.first.wpilibj.LEDPattern;
 import edu.wpi.first.wpilibj.util.Color;
 import frc.robot.utils.RumbleSubsystem.Priority;
@@ -8,6 +11,7 @@ import frc.robot.utils.RumblePack;
 
 public final class Constants {
   public static boolean disableHAL = false;
+  public static double loopPeriodSecs = 0.02;
 
   public static class OperatorConstants {
 
@@ -30,7 +34,7 @@ public final class Constants {
 
   public static class SwerveDriveConstants {
     public static final double kMaxSpeed = 5.36448;
-    public static final double kMaxAngularVelocity = 2* Math.PI;
+    public static final double kMaxAngularVelocity = 2 * Math.PI;
     public static final double kAimingSpeedModifier = 2.5;
     public static final double kMaxStrafe = 0.5; // max strafe speed while aiming
     public static final double kVisionPeriod = 0.1; // 10Hz
@@ -57,43 +61,15 @@ public final class Constants {
 
     public static final double kNeutralZoneShootingRPM = 1000;
 
-    public record ShooterPoint(
-            double distanceMeters,
-            double rpm,
-            double hoodAngle) {
-    }
-
-    // fake data for now
-    public static final ShooterPoint[] kShooterLUT = {
-        new ShooterPoint(2.0, 3100, 45),
-        new ShooterPoint(2.5, 3350, 46),
-        new ShooterPoint(3.0, 3600, 47),
-        new ShooterPoint(3.5, 3900, 50),
-        new ShooterPoint(4.0, 4250, 67)
-    };
-
-    public static final InterpolatingDoubleTreeMap kRpmMap = new InterpolatingDoubleTreeMap();
-    public static final InterpolatingDoubleTreeMap kHoodMap = new InterpolatingDoubleTreeMap();
-
-    static {
-      for (ShooterPoint p : Constants.ShooterConstants.kShooterLUT) {
-        kRpmMap.put(p.distanceMeters(), p.rpm());
-        kHoodMap.put(p.distanceMeters(), p.hoodAngle());
-      }
-    }
+    public static final InterpolatingDoubleTreeMap kShotHoodAngleMap = new InterpolatingDoubleTreeMap();
+    public static final InterpolatingDoubleTreeMap kShotFlywheelSpeedMap = new InterpolatingDoubleTreeMap();
+    public static final InterpolatingDoubleTreeMap kTimeOfFlightMap = new InterpolatingDoubleTreeMap();
 
     public static final double kMaxShootingDist = 4.0;
     public static final double kRadialRPMComp = 150; // what rpm we need to compensate when driving backwards from the
                                                      // hub @ max accel
 
     public static final RumblePack kRumbleScoreReady = new RumblePack(0.3, 0.2, Priority.MEDIUM);
-
-    public static ShooterPoint interpolate(double distance) {
-        return new ShooterPoint(
-                distance,
-                Constants.ShooterConstants.kRpmMap.get(distance),
-                Constants.ShooterConstants.kHoodMap.get(distance));
-    }
   }
 
   public static class HoodConstants {
@@ -132,7 +108,7 @@ public final class Constants {
     public static final int kOpenAngle = 67;
     public static final int kClosedAngle = 0;
 
-    public static final double kShakeDelay = 0.3; 
+    public static final double kShakeDelay = 0.3;
     public static final double kShakeMax = 40;
     public static final double kShakeMin = 10;
   }
