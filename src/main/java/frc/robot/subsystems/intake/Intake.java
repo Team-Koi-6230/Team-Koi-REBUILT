@@ -16,7 +16,6 @@ import frc.robot.util.roller.RollerConfig;
 import frc.robot.util.roller.RollerConfig.RollerMotor;
 import frc.robot.util.roller.io.RollerIO;
 import frc.robot.util.roller.io.RollerIOInputsAutoLogged;
-import team6230.koiupstream.subsystems.ConditionalAction;
 import team6230.koiupstream.subsystems.ExtraIO;
 import team6230.koiupstream.subsystems.UpstreamSubsystem;
 import team6230.koiupstream.superstates.Superstate;
@@ -77,7 +76,8 @@ public class Intake extends UpstreamSubsystem<RobotState, IntakeIO, IntakeIOInpu
         config.motor = RollerMotor.NEO;
         config.name = "IntakeRoller";
         config.motorId = RobotMap.CanBus.kIntakeRollerID;
-        config.gearRatio = IntakeConstants.kRollerGearRatio;
+        config.gearRatio = IntakeConstants.kRollerGea                                                                                                                                                                                                                                                                                                                                                           333333333333333333
+        +0rRatio;
         config.smartCurrentLimit = 80;
         roller = Roller.makeRollerIO(config);
 
@@ -101,8 +101,8 @@ public class Intake extends UpstreamSubsystem<RobotState, IntakeIO, IntakeIOInpu
             roller.runVoltage(0);
         });
         addSuperstateBehaviour(RobotState.SHOOTING, () -> {
+            home();
             roller.runVoltage(IntakeConstants.kShootingVolts);
-            oscillating();
         });
         addSuperstateBehaviour(RobotState.PRESHOOTING, () -> openArm());
         addSuperstateBehaviour(RobotState.HOME, () -> home());
@@ -137,11 +137,7 @@ public class Intake extends UpstreamSubsystem<RobotState, IntakeIO, IntakeIOInpu
         io.runVoltsPivot(IntakeConstants.kPivotOpenVolts);
         pivotStallDebouncer = newStallDebouncer();
         rollerStartStallDebouncer = newRollerStartStallDebouncer();
-        roller.runVoltage(0);
-
-        registerConditionalAction(new ConditionalAction(
-                () -> isPivotStalled(rollerStartStallDebouncer),
-                () -> roller.runVoltage(IntakeConstants.kIntakingVolts)));
+        roller.runVoltage(IntakeConstants.kIntakingVolts);
     }
 
     private void openArm() {

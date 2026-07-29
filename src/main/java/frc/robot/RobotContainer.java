@@ -2,9 +2,7 @@ package frc.robot;
 
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
-import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
-import com.pathplanner.lib.commands.PathPlannerAuto;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -66,10 +64,7 @@ public class RobotContainer {
                 NamedCommands.registerCommand("Intake", superstate.setWantedSuperstateCommand(RobotState.INTAKING));
                 NamedCommands.registerCommand("Idle", superstate.setWantedSuperstateCommand(RobotState.IDLE));
 
-                autoChooser = new LoggedDashboardChooser<>("Auto Chooser", AutoBuilder.buildAutoChooser());
-
-                autoChooser.addOption("safe middle attack like bron (right)",
-                                new PathPlannerAuto("safe middle attack like bron", true));
+                autoChooser = new LoggedDashboardChooser<>("Auto Chooser");
 
                 autoChooser.addOption("Step back three from the center (backup)",
                                 Commands.runOnce(() -> {
@@ -78,11 +73,12 @@ public class RobotContainer {
                                                 .andThen(
                                                                 Commands.run(() -> drive.runVelocity(
                                                                                 new ChassisSpeeds(-1.0, 0, 0)), drive)
-                                                                                .withTimeout(1.5))
+                                                                                .withTimeout(0.75))
                                                 .andThen(() -> drive.runVelocity(new ChassisSpeeds(0, 0, 0)))
                                                 .andThen(
                                                                 Commands.run(() -> {
-                                                                        if (superstate.isCurrent(RobotState.SHOOTING)) {
+                                                                        if (superstate.isCurrent(
+                                                                                        RobotState.SHOOTING)) {
                                                                                 superstate.setWantedSuperstate(
                                                                                                 RobotState.SHOOTING);
                                                                         } else {
@@ -91,17 +87,19 @@ public class RobotContainer {
                                                                         }
                                                                 }, superstate))
                                                 .andThen(superstate.setWantedSuperstateCommand(RobotState.IDLE)));
-
+                                                                                                                                                    bb                                                                                                                                                                            
                 autoChooser.addDefaultOption("resetOdometry", Commands.runOnce(
                                 () -> {
                                         resetGyro();
                                 },
                                 drive));
 
-                configureBindings();
+                           configureBindings();
         }
 
         private void configureBindings() {
+                // driverController.b().whileTrue(superstate.setWantedSuperstateCommand(RobotState.IDLE));
+
                 IntakeButton
                                 .and(PreparingShooterButton.negate()).and(ShootingButton.negate())
                                 .whileTrue(superstate.setWantedSuperstateCommand(RobotState.INTAKING));
@@ -114,6 +112,12 @@ public class RobotContainer {
                                 .and(ShootingButton.negate()).and(IntakeButton)
                                 .whileTrue(superstate
                                                 .setWantedSuperstateCommand(RobotState.PREPARING_SHOOTER_AND_INTAKING));
+
+                ShootingButton.and(IntakeButton).and(() -> !superstate.isCurrent(RobotState.SHOOTING))
+                                .whileTrue(superstate.setWantedSuperstateCommand(RobotState.PRESHOOTING));
+
+                ShootingButton.and(IntakeButton.and(() -> superstate.isCurrent(RobotState.SHOOTING)))
+                                .whileTrue(superstate.setWantedSuperstateCommand(RobotState.SHOOTING_AND_INTAKING));
 
                 ShootingButton
                                 .and(IntakeButton.negate())

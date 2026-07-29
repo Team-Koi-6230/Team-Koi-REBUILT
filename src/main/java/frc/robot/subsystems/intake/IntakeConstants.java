@@ -10,7 +10,7 @@ public class IntakeConstants {
     public static final double kPivotShaftToPivotGearRatio = kPivotMotorToPivotGearRatio /
             kPivotMotorToShaftGearRatio;
 
-    public static final int kPivotCurrentLimits = 10;
+    public static final int kPivotCurrentLimits = 9;
     public static final int kRollerCurrentLimits = 40;
     public static final int kIntakingVolts = 12;
     public static final int kShootingVolts = 6;
@@ -29,7 +29,7 @@ public class IntakeConstants {
     public static final Rotation2d kMinOpenAngle = Rotation2d.fromDegrees(14);
     public static final double kErrorToleranceDeg = 2;
 
-    public static final double kOscillationIntervalSecs = 0.5;
+    public static final double kOscillationIntervalSecs = 2;
 
     public static final double kWantedSteps = 2;
     public static final double kStepSizeDegrees = kClosedAngle.getDegrees() / kWantedSteps;
@@ -60,7 +60,7 @@ public class IntakeConstants {
     public static final double kMaxAccelRadPerSecSquared = 120 * Math.PI;
 
     // new comp stuff for new controls system
-    public static final double kPivotDriveVolts = 3.0;
+    public static final double kPivotDriveVolts = 3;
     public static final double kPivotOpenVolts = -kPivotDriveVolts;
     public static final double kPivotClosedVolts = kPivotDriveVolts;
 
