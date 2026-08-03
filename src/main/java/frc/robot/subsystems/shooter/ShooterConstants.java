@@ -43,6 +43,7 @@ public class ShooterConstants {
         public static final RollerConfig.RollerMotor kRollerMotor = RollerConfig.RollerMotor.NEO;
 
         public static final double kFeedVolts = 12;
+        public static final double kShowcaseVolts = 6;
         public static final double kUnjamVolts = -6;
     }
 }

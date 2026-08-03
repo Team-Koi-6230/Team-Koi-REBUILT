@@ -20,9 +20,12 @@ public class BallisticsCalculator {
     private final NetworkTableEntry longPass = NetworkTableInstance.getDefault()
             .getTable("SmartDashboard")
             .getEntry("Long Pass");
+    public final NetworkTableEntry showcaseMode = NetworkTableInstance.getDefault()
+            .getTable("SmartDashboard")
+            .getEntry("Showcase Mode");
 
     public double getFlywheelSetpoint() {
-        if (Robot.isShowcaseMode)
+        if (showcaseMode.getBoolean(false))
             return BallisticsParameters.kShowcaseSpeed;
         if (Robot.isInAllianceZone())
             return convertSurfaceVelocityToRotationPerMinute(
@@ -33,7 +36,7 @@ public class BallisticsCalculator {
     }
 
     public double getHoodSetpoint() {
-        if (Robot.isShowcaseMode)
+        if (showcaseMode.getBoolean(false))
             return BallisticsParameters.kShowcaseAngle;
         if (Robot.isInAllianceZone())
             return BallisticsParameters.kShotHoodAngleMap.get(getShooterDistanceToHub());

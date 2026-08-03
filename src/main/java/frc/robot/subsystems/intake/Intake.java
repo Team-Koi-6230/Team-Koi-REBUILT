@@ -76,8 +76,8 @@ public class Intake extends UpstreamSubsystem<RobotState, IntakeIO, IntakeIOInpu
         config.motor = RollerMotor.NEO;
         config.name = "IntakeRoller";
         config.motorId = RobotMap.CanBus.kIntakeRollerID;
-        config.gearRatio = IntakeConstants.kRollerGea                                                                                                                                                                                                                                                                                                                                                           333333333333333333
-        +0rRatio;
+        config.gearRatio = IntakeConstants.kRollerGearRatio;
+
         config.smartCurrentLimit = 80;
         roller = Roller.makeRollerIO(config);
 

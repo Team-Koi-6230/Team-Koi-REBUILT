@@ -126,7 +126,7 @@ public class Shooter extends UpstreamSubsystem<RobotState, ShooterIO, ShooterIOI
 
         var currentWantedHoodSetpoint = ShooterConstants.Hood.kNonShootingAngle;
         if (isShooting && !DriverStation.isTest()) {
-            currentWantedHoodSetpoint = _ShowcaseShooter ? BallisticsParameters.kShowcaseAngle
+            currentWantedHoodSetpoint = ballisticsCalculator.showcaseMode.getBoolean(false) ? BallisticsParameters.kShowcaseAngle
                     : ballisticsCalculator.getHoodSetpoint();
         }
 
@@ -142,11 +142,7 @@ public class Shooter extends UpstreamSubsystem<RobotState, ShooterIO, ShooterIOI
             return;
 
         var flywheelSetpoint = ballisticsCalculator.getFlywheelSetpoint();
-        if (_ShowcaseShooter) {
-            flywheelSetpoint = ballisticsCalculator
-                    .convertSurfaceVelocityToRotationPerMinute(BallisticsParameters.kShowcaseSpeed);
-        }
-
+        
         if (Superstate.getInstance().isCurrentWanted(RobotState.PRESHOOTING)) {
             if (isFinishedPreShooting()) {
                 Superstate.getInstance().setWantedSuperstate(RobotState.SHOOTING);
@@ -224,7 +220,9 @@ public class Shooter extends UpstreamSubsystem<RobotState, ShooterIO, ShooterIOI
         boolean readyToFeed = isVelocityOkToContinue && isFlywheelInLooseTolerance() && isHoodInTolerance();
 
         if (feederDebouncer.calculate(readyToFeed)) {
-            rollerIO.runVoltage(ShooterConstants.Roller.kFeedVolts);
+            rollerIO.runVoltage(ballisticsCalculator.showcaseMode.getBoolean(false)
+                    ? ShooterConstants.Roller.kShowcaseVolts
+                    : ShooterConstants.Roller.kFeedVolts);
         } else {
             rollerIO.runVoltage(0);
         }

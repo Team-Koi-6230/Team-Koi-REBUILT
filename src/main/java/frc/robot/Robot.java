@@ -62,6 +62,7 @@ public class Robot extends LoggedRobot {
     CameraServer.startAutomaticCapture();
 
     SmartDashboard.putBoolean("Long Pass", false);
+    SmartDashboard.putBoolean("Showcase Mode", false);
 
     SmartDashboard.putData("Field", m_field);
   }
