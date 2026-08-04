@@ -2,6 +2,8 @@ package frc.robot.subsystems.drive;
 
 import static edu.wpi.first.units.Units.Volts;
 import static frc.robot.subsystems.drive.DriveConstants.driveBaseRadius;
+import static frc.robot.subsystems.drive.DriveConstants.kShowCaseMaxSpeedPerSec;
+import static frc.robot.subsystems.drive.DriveConstants.kShowcaseOmega;
 import static frc.robot.subsystems.drive.DriveConstants.maxSpeedMetersPerSec;
 import static frc.robot.subsystems.drive.DriveConstants.moduleTranslations;
 import static frc.robot.subsystems.drive.DriveConstants.ppConfig;
@@ -44,6 +46,7 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
@@ -64,7 +67,7 @@ public class Drive extends UpstreamDrivebase<RobotState> {
   private final SysIdRoutine sysId;
   private final Alert gyroDisconnectedAlert = new Alert("Disconnected gyro, using kinematics as fallback.",
       AlertType.kError);
-
+  
   private PIDController _aimingPID;
   @AutoLogOutput
   private boolean _shouldRoundOrientation = false;
@@ -83,8 +86,9 @@ public class Drive extends UpstreamDrivebase<RobotState> {
 
   @AutoLogOutput
   private boolean _slowModeActive = false;
-
   private final BooleanSubscriber _slowModeSubscriber;
+
+  private boolean isShowcase = false;
 
   private SwerveDriveKinematics kinematics = new SwerveDriveKinematics(moduleTranslations);
   private Rotation2d rawGyroRotation = Rotation2d.kZero;
@@ -243,8 +247,8 @@ public class Drive extends UpstreamDrivebase<RobotState> {
         _shouldRoundOrientation = false;
       }
     }
-
-    omega = MathUtil.clamp(omega, -getMaxAngularSpeedRadPerSec(), getMaxAngularSpeedRadPerSec());
+  double maxOmega = isShowcase ? kShowcaseOmega : getMaxAngularSpeedRadPerSec();
+  omega = MathUtil.clamp(omega, -maxOmega, maxOmega);
 
     return convertFieldRelativeSpeedsToRobotRelative(new ChassisSpeeds(vxSlewed, vySlewed, omega));
   }
@@ -291,6 +295,7 @@ public class Drive extends UpstreamDrivebase<RobotState> {
     odometryLock.unlock();
 
     boolean ntSlowMode = _slowModeSubscriber.get();
+    isShowcase = SmartDashboard.getBoolean("Showcase Mode", false);
     if (ntSlowMode != _slowModeActive) {
       _slowModeActive = ntSlowMode;
       Logger.recordOutput("Drive/SlowModeActive", _slowModeActive);
@@ -461,6 +466,9 @@ public class Drive extends UpstreamDrivebase<RobotState> {
   }
 
   public double getMaxLinearSpeedMetersPerSec() {
+    if (isShowcase) {
+      return kShowCaseMaxSpeedPerSec;
+    }
     return _slowModeActive ? slowMaxSpeedMeterPerSec : maxSpeedMetersPerSec;
   }
 

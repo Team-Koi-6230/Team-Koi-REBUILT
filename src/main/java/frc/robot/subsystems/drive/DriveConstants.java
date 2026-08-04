@@ -11,6 +11,8 @@ import edu.wpi.first.math.util.Units;
 public class DriveConstants {
         public static final double maxSpeedMetersPerSec = 4.8;
         public static final double slowMaxSpeedMeterPerSec = 1.2;
+        public static final double kShowCaseMaxSpeedPerSec = 1.5;
+        public static final double kShowcaseOmega = 0.5;
         public static final double odometryFrequency = 100.0;
         public static final double driveBaseRadius = Units.inchesToMeters(16.97);
         public static final double trackWidth = Units.inchesToMeters(24);
