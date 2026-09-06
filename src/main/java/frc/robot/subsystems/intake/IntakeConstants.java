@@ -10,10 +10,10 @@ public class IntakeConstants {
     public static final double kPivotShaftToPivotGearRatio = 0;//kPivotMotorToPivotGearRatio /
            // kPivotMotorToShaftGearRatio;
 
-    public static final int kPivotCurrentLimits = 12;
-    public static final int kRollerCurrentLimits = 40;
-    public static final int kIntakingVolts = 12;
-    public static final int kShootingVolts = 6;
+    public static final int kPivotCurrentLimits = 0;
+    public static final int kRollerCurrentLimits = 0;
+    public static final int kIntakingVolts = 0;
+    public static final int kShootingVolts = 0;
     public static final boolean kMotorInverted = true;
 
     public static final Rotation2d kThroughBoreOffset = Rotation2d.fromDegrees(0);
