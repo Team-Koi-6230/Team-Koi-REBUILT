@@ -87,13 +87,13 @@ public class IntakeIORev implements IntakeIO {
         public void updateInputs(IntakeIOInputsAutoLogged inputs) {
                 double currentAbsAngleDeg = getAbsoluteEncoder().getDegrees();
 
-                if (!_hasSeeded && _seedAttempts > 10) {
-                        double absAngle = getAbsoluteEncoder().getDegrees();
-                        tryUntilOk(m_pivot, 5, () -> m_relativeEncoder.setPosition(absAngle));
-                        _hasSeeded = true;
-                } else if (!_hasSeeded) {
-                        _seedAttempts++;
-                }
+                // if (!_hasSeeded && _seedAttempts > 10) {
+                //         double absAngle = getAbsoluteEncoder().getDegrees();
+                //         tryUntilOk(m_pivot, 5, () -> m_relativeEncoder.setPosition(absAngle));
+                //         _hasSeeded = true;
+                // } else if (!_hasSeeded) {
+                //         _seedAttempts++;
+                // }
 
                 inputs.absolutePivotAngleDeg = currentAbsAngleDeg;
                 inputs.absolutePivotAngleRad = Math.toRadians(currentAbsAngleDeg);

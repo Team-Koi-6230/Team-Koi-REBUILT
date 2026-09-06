@@ -26,7 +26,7 @@ public class BallisticsCalculator {
 
     public double getFlywheelSetpoint() {
         if (showcaseMode.getBoolean(false))
-            return BallisticsParameters.kShowcaseSpeed;
+            return convertSurfaceVelocityToRotationPerMinute(BallisticsParameters.kShowcaseSpeed);
         if (Robot.isInAllianceZone())
             return convertSurfaceVelocityToRotationPerMinute(
                     BallisticsParameters.kShotFlywheelSpeedMap.get(getShooterDistanceToHub()));
